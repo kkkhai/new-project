@@ -1,0 +1,8 @@
+{
+  "appId": "vn.fproduction.diamondrush",
+  "appName": "Diamond Rush Recreate",
+  "webDir": "dist",
+  "backgroundColor": "#14110f",
+  "android": { "allowMixedContent": false },
+  "ios": { "contentInset": "never" }
+}

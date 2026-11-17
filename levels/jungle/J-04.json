@@ -13,10 +13,11 @@
     "#P O        #",
     "####^###### #",
     "#*    S    *#",
-    "#.##^########",
+    "#.r#^########",
     "#.###########",
     "#*   *    E #",
     "#############"
   ],
-  "solution": "UUUUUUUUUUUUUUUUUUURRRRRRRRRRDDLLLLLLLLLLDDDRRRRRRRRR"
+  "solution": "UUUUUUUUUUUUUUUUUUURRRRRRRRRRDDLLLLLLLLLLDDDRRRRRRRRR",
+  "secretSolution": "UUUUUUUUUUUUUUUUUUURRRRRRRRRRDDLLLLLLLLLLDRLDDRRRRRRRRR"
 }

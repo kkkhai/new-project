@@ -10,14 +10,11 @@ import { COLORS, TILE, WORLD_TINT } from './palette.ts';
 import { DART_PERIOD } from '../core/rules.ts';
 import type { ResultsData } from './scenes/ResultsScene.ts';
 import { loadSave, writeSave } from './save.ts';
+import { t, type TextKey } from './i18n.ts';
 import { button, FONT } from './ui.ts';
 
 const TICK_MS = TICK_SECONDS * 1000;
-const TOOL_HINT: Record<string, string> = {
-  machete: 'Machete! Space (TOOL) cuts vines and thorns',
-  shovel: 'Shovel! Space (TOOL) digs packed sand and fills quicksand',
-  pickaxe: 'Pickaxe! Space (TOOL) breaks ice',
-};
+const TOOL_HINT: Record<string, TextKey> = { machete: 'machete', shovel: 'shovel', pickaxe: 'pickaxe' };
 const KEY_DIRS: Record<string, Dir> = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
   KeyW: 'up', KeyS: 'down', KeyA: 'left', KeyD: 'right',
@@ -57,6 +54,7 @@ export class GameScene extends Phaser.Scene {
   private stopped = false;
   private paused = false;
   private audio!: Audio;
+  private timeTrial = false;
 
   constructor() {
     super('Game');
@@ -80,10 +78,15 @@ export class GameScene extends Phaser.Scene {
     this.audio.setMuted(save.settings.muted);
     this.audio.playMusic(this.def.id.endsWith('BOSS') ? 'boss' : this.def.world);
 
-    this.session = new Session(this.def);
+    this.session = new Session(this.def, save.settings.difficulty);
+    this.timeTrial = save.settings.timeTrial;
     this.redTotal = countRedDiamonds(parseLevel(this.def));
     this.terrainGfx = this.add.graphics();
-    this.playerView = this.add.rectangle(0, 0, TILE - 8, TILE - 6, COLORS.player).setStrokeStyle(2, COLORS.playerFace).setDepth(10);
+    const costume = save.settings.costume;
+    this.playerView = this.add
+      .rectangle(0, 0, TILE - 8, TILE - 6, costume ? COLORS.exitOpen : COLORS.player)
+      .setStrokeStyle(2, costume ? 0xffffff : COLORS.playerFace)
+      .setDepth(10);
 
     this.hud = this.add
       .text(12, 10, '', { fontFamily: FONT, fontSize: '18px', color: '#f5e9d0', backgroundColor: '#00000088', padding: { x: 6, y: 4 } })
@@ -137,6 +140,9 @@ export class GameScene extends Phaser.Scene {
           break;
         case 'KeyR':
           this.restartRoom();
+          break;
+        case 'KeyZ':
+          this.undo();
           break;
         case 'Escape':
         case 'KeyP':
@@ -206,7 +212,10 @@ export class GameScene extends Phaser.Scene {
     }
     const tool = button(this, width - 90, height - 100, 'TOOL', () => (this.queuedAction = true), { size: 20, width: 100 });
     const pause = button(this, width - 60, 30, '❚❚', () => this.togglePause(), { size: 18 });
-    for (const b of [tool, pause]) b.setScrollFactor(0).setDepth(120);
+    const extra = this.session.canUndo || this.session.difficulty === 'easy'
+      ? [button(this, width - 90, height - 170, t('undo'), () => this.undo(), { size: 16, width: 100 })]
+      : [];
+    for (const b of [tool, pause, ...extra]) b.setScrollFactor(0).setDepth(120);
   }
 
   private nextInput(): { dir: Dir | null; action: boolean } {
@@ -226,21 +235,22 @@ export class GameScene extends Phaser.Scene {
     this.audio.playEvents(events);
     this.render(result === 'respawn' || result === 'gameOver');
 
-    if (events.some((e) => e.type === 'checkpoint')) this.flash('Checkpoint saved', '#3fbf7f');
+    if (events.some((e) => e.type === 'checkpoint')) this.flash(t('checkpoint'), '#3fbf7f');
     const tool = events.find((e) => e.type === 'tool');
-    if (tool) this.flash(TOOL_HINT[tool.kind ?? ''] ?? 'New tool!', '#f0c850', 2200);
+    const hint = TOOL_HINT[tool?.kind ?? ''];
+    if (hint) this.flash(t(hint), '#f0c850', 2200);
     for (const e of events) if (e.type === 'dart') this.drawDart(e.x, e.y, e.toX ?? e.x);
-    if (events.some((e) => e.type === 'steal')) this.flash('The monkey stole a diamond!', '#ff9f43');
-    if (events.some((e) => e.type === 'grow')) this.flash('The snowball grew!', '#e8f8ff');
-    if (events.some((e) => e.type === 'bossDefeated')) this.flash('The guardian falls! The exit is open', '#f0c850', 1800);
+    if (events.some((e) => e.type === 'steal')) this.flash(t('stolen'), '#ff9f43');
+    if (events.some((e) => e.type === 'grow')) this.flash(t('grew'), '#e8f8ff');
+    if (events.some((e) => e.type === 'bossDefeated')) this.flash(t('bossDown'), '#f0c850', 1800);
     else if (events.some((e) => e.type === 'bossHit')) this.cameras.main.shake(250, 0.012);
 
     if (result === 'respawn') {
       this.cameras.main.shake(200, 0.01);
-      this.flash(`Ouch! ${this.state.hearts} ♥ left`, '#ff6b6b');
+      this.flash(t('ouch', { n: this.state.hearts }), '#ff6b6b');
     } else if (result === 'gameOver') {
       this.cameras.main.shake(300, 0.015);
-      this.flash('Out of hearts: level restarted', '#ff6b6b', 1500);
+      this.flash(t('outOfHearts'), '#ff6b6b', 1500);
     } else if (result === 'won') {
       this.finish();
     }
@@ -278,12 +288,18 @@ export class GameScene extends Phaser.Scene {
     if (this.stopped) return;
     this.session.restartRoom();
     this.render(true);
-    this.flash('Room restarted', '#f5e9d0');
+    this.flash(t('roomRestarted'), '#f5e9d0');
+  }
+
+  private undo(): void {
+    if (this.stopped || this.paused || this.session.difficulty !== 'easy') return;
+    if (this.session.undo()) this.render(true);
+    else this.flash(t('nothingToUndo'), '#f5e9d0');
   }
 
   private goTo(levelId: string | undefined): void {
     if (levelId) this.scene.start('Game', { levelId });
-    else this.scene.start('LevelSelect');
+    else this.scene.start('WorldMap');
   }
 
   private toggleMute(): void {
@@ -291,7 +307,7 @@ export class GameScene extends Phaser.Scene {
     save.settings.muted = !save.settings.muted;
     writeSave(save);
     this.audio.setMuted(save.settings.muted);
-    this.flash(save.settings.muted ? 'Sound off' : 'Sound on', '#f5e9d0');
+    this.flash(save.settings.muted ? t('soundOff') : t('soundOn'), '#f5e9d0');
   }
 
   private togglePause(): void {
@@ -303,13 +319,13 @@ export class GameScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const bg = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.65).setScrollFactor(0).setDepth(200).setInteractive();
     const items: [string, () => void][] = [
-      ['Resume', () => this.togglePause()],
-      ['Restart room', () => {
+      [t('resume'), () => this.togglePause()],
+      [t('restartRoom'), () => {
         this.togglePause();
         this.restartRoom();
       }],
-      ['Restart level', () => this.goTo(this.def.id)],
-      ['Quit to levels', () => this.scene.start('LevelSelect')],
+      [t('restartLevel'), () => this.goTo(this.def.id)],
+      [t('quit'), () => this.scene.start('WorldMap')],
     ];
     this.pauseLayer = [
       bg,
@@ -346,9 +362,13 @@ export class GameScene extends Phaser.Scene {
     const hearts = '♥'.repeat(st.hearts) + '♡'.repeat(Math.max(0, st.maxHearts - st.hearts));
     const keys = `${st.keys.silver ? `  silver key ×${st.keys.silver}` : ''}${st.keys.gold ? `  gold key ×${st.keys.gold}` : ''}`;
     const tools = (Object.keys(st.tools) as (keyof typeof st.tools)[]).filter((t) => st.tools[t]).join(' ');
+    const secs = this.session.ticks * TICK_SECONDS;
+    const timer = this.timeTrial
+      ? `   ⏱ ${Math.floor(secs / 60)}:${Math.floor(secs % 60).toString().padStart(2, '0')} / par ${this.def.parTimeSec ?? '-'}s`
+      : '';
     this.hud.setText(
-      `${hearts}   ◆ ${st.diamonds}/${st.quota}${exitOpen(st) ? ' EXIT OPEN' : ''}   ♦ ${st.redDiamonds}/${this.redTotal}${keys}` +
-        `${tools ? `   [${tools}]` : ''}\n${this.def.id} ${this.def.name}`,
+      `${hearts}   ◆ ${st.diamonds}/${st.quota}${exitOpen(st) ? ` ${t('exitOpen')}` : ''}   ♦ ${st.redDiamonds}/${this.redTotal}${keys}` +
+        `${tools ? `   [${tools}]` : ''}\n${this.def.id} ${this.def.name}${timer}`,
     );
   }
 

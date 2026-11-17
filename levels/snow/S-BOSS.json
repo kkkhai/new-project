@@ -16,8 +16,9 @@
     "#  #     #  #",
     "#I    T    I#",
     "#  #     #  #",
-    "#P         E#",
+    "#P     r   E#",
     "#############"
   ],
-  "solution": "URUUUUUUUUUUUUURRDDUUUUUUUUUUUUDRRRURRRLUUUULDDDDRRR"
+  "solution": "URUUUUUUUUUUUUURRDDUUUUUUUUUUUUDRRRURRRLUUUULDDDDRRR",
+  "secretSolution": "URUUUUUUUUUUUUURRDDUUUUUUUUUUUUDRRRURRRLUUUULDDDDLRRRR"
 }
