@@ -1,0 +1,20 @@
+{
+  "id": "D-05",
+  "name": "Dart Alley",
+  "world": "desert",
+  "quota": 1,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel"
+  ],
+  "notes": "Insight: the boulder shields you from the right-hand trap while you push it, but the left-hand trap still fires every 8 ticks. Start pushing right after a dart flies.",
+  "map": [
+    "###############",
+    ">   O        <#",
+    "###.####.######",
+    "#P  #   *  E  #",
+    "###############"
+  ],
+  "solution": "UUUUURRUURRRRRDDRRR"
+}

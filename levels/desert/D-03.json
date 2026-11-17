@@ -1,0 +1,18 @@
+{
+  "id": "D-03",
+  "name": "Sand Slide",
+  "world": "desert",
+  "quota": 1,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel"
+  ],
+  "notes": "Insight: push sand piles into quicksand to pack it solid.",
+  "map": [
+    "################",
+    "#Po qqq o qqq*E#",
+    "################"
+  ],
+  "solution": "RRRRRRRRRRRRR"
+}

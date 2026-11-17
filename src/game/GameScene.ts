@@ -6,12 +6,18 @@ import { exitOpen } from '../core/tick.ts';
 import type { Actor, Dir, GameState, Obj } from '../core/types.ts';
 import { Audio } from './audio.ts';
 import { CAMPAIGN_ORDER, levelById, nextLevelId, TRAINING } from './levels.ts';
-import { COLORS, TILE } from './palette.ts';
+import { COLORS, TILE, WORLD_TINT } from './palette.ts';
+import { DART_PERIOD } from '../core/rules.ts';
 import type { ResultsData } from './scenes/ResultsScene.ts';
 import { loadSave, writeSave } from './save.ts';
 import { button, FONT } from './ui.ts';
 
 const TICK_MS = TICK_SECONDS * 1000;
+const TOOL_HINT: Record<string, string> = {
+  machete: 'Machete! Space (TOOL) cuts vines and thorns',
+  shovel: 'Shovel! Space (TOOL) digs packed sand and fills quicksand',
+  pickaxe: 'Pickaxe! Space (TOOL) breaks ice',
+};
 const KEY_DIRS: Record<string, Dir> = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
   KeyW: 'up', KeyS: 'down', KeyA: 'left', KeyD: 'right',
@@ -221,9 +227,12 @@ export class GameScene extends Phaser.Scene {
     this.render(result === 'respawn' || result === 'gameOver');
 
     if (events.some((e) => e.type === 'checkpoint')) this.flash('Checkpoint saved', '#3fbf7f');
-    if (events.some((e) => e.type === 'tool')) this.flash('Machete! Press Space (TOOL) to cut vines', '#f0c850', 2200);
+    const tool = events.find((e) => e.type === 'tool');
+    if (tool) this.flash(TOOL_HINT[tool.kind ?? ''] ?? 'New tool!', '#f0c850', 2200);
+    for (const e of events) if (e.type === 'dart') this.drawDart(e.x, e.y, e.toX ?? e.x);
     if (events.some((e) => e.type === 'steal')) this.flash('The monkey stole a diamond!', '#ff9f43');
     if (events.some((e) => e.type === 'bossDefeated')) this.flash('The guardian falls! The exit is open', '#f0c850', 1800);
+    else if (events.some((e) => e.type === 'bossHit')) this.cameras.main.shake(250, 0.012);
 
     if (result === 'respawn') {
       this.cameras.main.shake(200, 0.01);
@@ -307,6 +316,15 @@ export class GameScene extends Phaser.Scene {
     ];
   }
 
+  private drawDart(x: number, y: number, toX: number): void {
+    const line = this.add
+      .line(0, 0, x * TILE + TILE / 2, y * TILE + TILE / 2, toX * TILE + TILE / 2, y * TILE + TILE / 2, COLORS.dartWarn)
+      .setOrigin(0)
+      .setLineWidth(3)
+      .setDepth(20);
+    this.tweens.add({ targets: line, alpha: 0, duration: 250, onComplete: () => line.destroy() });
+  }
+
   /** Short message that fades out on its own. */
   private flash(text: string, color: string, ms = 900): void {
     this.banner.setText(text).setColor(color).setVisible(true);
@@ -336,24 +354,26 @@ export class GameScene extends Phaser.Scene {
   private drawTerrain(): void {
     const g = this.terrainGfx;
     const s = this.state;
+    const tint = WORLD_TINT[this.def.world] ?? WORLD_TINT.test;
+    const dartWarn = (s.tick + 1) % DART_PERIOD === 0;
     g.clear();
     for (let y = 0; y < s.height; y++) {
       for (let x = 0; x < s.width; x++) {
         const px = x * TILE;
         const py = y * TILE;
         const t = s.terrain[y * s.width + x];
-        const floor = () => g.fillStyle(COLORS.floor).fillRect(px, py, TILE, TILE);
+        const floor = () => g.fillStyle(tint.floor).fillRect(px, py, TILE, TILE);
         switch (t) {
           case 'floor':
             floor();
             break;
           case 'wall':
-            g.fillStyle(COLORS.wallEdge).fillRect(px, py, TILE, TILE);
-            g.fillStyle(COLORS.wall).fillRect(px + 2, py + 2, TILE - 4, TILE - 4);
+            g.fillStyle(tint.wallEdge).fillRect(px, py, TILE, TILE);
+            g.fillStyle(tint.wall).fillRect(px + 2, py + 2, TILE - 4, TILE - 4);
             break;
           case 'dirt':
-            g.fillStyle(COLORS.dirt).fillRect(px, py, TILE, TILE);
-            g.fillStyle(COLORS.dirtSpeck);
+            g.fillStyle(tint.dirt).fillRect(px, py, TILE, TILE);
+            g.fillStyle(tint.dirtSpeck);
             for (const [sx, sy] of [[6, 7], [20, 5], [12, 18], [25, 22], [5, 26]]) g.fillRect(px + sx, py + sy, 3, 3);
             break;
           case 'exit':
@@ -424,6 +444,32 @@ export class GameScene extends Phaser.Scene {
             g.fillStyle(COLORS.water).fillRect(px, py, TILE, TILE);
             g.lineStyle(2, COLORS.waterLight).lineBetween(px + 4, py + 10, px + 14, py + 10).lineBetween(px + 16, py + 22, px + 28, py + 22);
             break;
+          case 'crumble':
+          case 'crumbling': {
+            floor();
+            const left = s.timers[y * s.width + x];
+            g.fillStyle(t === 'crumbling' ? COLORS.crumbling : COLORS.crumble).fillRect(px + 2, py + 2, TILE - 4, TILE - 4);
+            g.lineStyle(1, 0x000000, 0.5).lineBetween(px + 4, py + 16, px + 28, py + 12).lineBetween(px + 16, py + 4, px + 14, py + 28);
+            if (t === 'crumbling' && left !== undefined && left <= 2) g.fillStyle(0x000000, 0.4).fillRect(px + 2, py + 2, TILE - 4, TILE - 4);
+            break;
+          }
+          case 'quicksand':
+            g.fillStyle(COLORS.quicksand).fillRect(px, py, TILE, TILE);
+            g.lineStyle(2, COLORS.quicksandSwirl).strokeCircle(px + 16, py + 16, 9).strokeCircle(px + 16, py + 16, 4);
+            break;
+          case 'packedSand':
+            g.fillStyle(COLORS.packedSand).fillRect(px, py, TILE, TILE);
+            g.fillStyle(COLORS.quicksandSwirl);
+            for (const [sx, sy] of [[5, 6], [18, 9], [10, 20], [24, 24]]) g.fillRect(px + sx, py + sy, 4, 2);
+            break;
+          case 'dartRight':
+          case 'dartLeft': {
+            g.fillStyle(tint.wallEdge).fillRect(px, py, TILE, TILE);
+            g.fillStyle(dartWarn ? COLORS.dartWarn : COLORS.dart);
+            const mx = t === 'dartRight' ? px + TILE - 6 : px + 6;
+            g.fillTriangle(mx, py + 16, t === 'dartRight' ? mx - 12 : mx + 12, py + 8, t === 'dartRight' ? mx - 12 : mx + 12, py + 24);
+            break;
+          }
         }
       }
     }
@@ -462,7 +508,7 @@ export class GameScene extends Phaser.Scene {
       } else {
         this.moveView(view, a.x, a.y, instant);
       }
-      if (a.kind === 'idol') view.setAlpha(0.55 + 0.15 * a.hp);
+      if (a.kind === 'idol' || a.kind === 'serpent') view.setAlpha(0.55 + 0.15 * a.hp);
     }
     this.removeMissing(this.actorViews, seen);
   }
@@ -498,6 +544,8 @@ export class GameScene extends Phaser.Scene {
       case 'shovel':
       case 'pickaxe':
         return this.add.rectangle(0, 0, 6, 24, COLORS.tool).setAngle(35).setStrokeStyle(2, 0x000000, 0.5).setDepth(5);
+      case 'sand':
+        return this.add.ellipse(0, 4, TILE - 4, TILE - 10, COLORS.sand).setStrokeStyle(2, COLORS.quicksandSwirl).setDepth(5);
     }
   }
 
@@ -521,6 +569,32 @@ export class GameScene extends Phaser.Scene {
           this.add.circle(0, 4, 6, 0xe0b080),
           this.add.circle(-3, 0, 1.5, 0x000000),
           this.add.circle(3, 0, 1.5, 0x000000),
+        ]);
+        break;
+      case 'scorpion':
+        c.add([
+          this.add.ellipse(0, 4, 22, 12, COLORS.scorpion),
+          this.add.rectangle(0, -8, 3, 12, COLORS.scorpion),
+          this.add.circle(0, -14, 3, 0xff3b30),
+        ]);
+        break;
+      case 'scarab':
+        c.add([this.add.ellipse(0, 0, 18, 22, COLORS.scarab).setStrokeStyle(2, 0x9adada), this.add.rectangle(0, 0, 1, 20, 0x000000)]);
+        break;
+      case 'mummy':
+        c.add([
+          this.add.rectangle(0, 2, 18, 26, COLORS.mummy),
+          this.add.rectangle(0, -4, 18, 2, 0x8a8270),
+          this.add.rectangle(0, 4, 18, 2, 0x8a8270),
+          this.add.circle(-4, -6, 2, 0x30ff60),
+          this.add.circle(4, -6, 2, 0x30ff60),
+        ]);
+        break;
+      case 'serpent':
+        c.add([
+          this.add.ellipse(0, 0, TILE + 4, TILE - 6, COLORS.serpent).setStrokeStyle(3, 0x6a3a10),
+          this.add.circle(-6, -4, 3, 0xff3b30),
+          this.add.circle(6, -4, 3, 0xff3b30),
         ]);
         break;
       case 'idol':

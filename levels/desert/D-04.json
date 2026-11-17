@@ -1,0 +1,20 @@
+{
+  "id": "D-04",
+  "name": "Scorpion Shuffle",
+  "world": "desert",
+  "quota": 3,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel"
+  ],
+  "notes": "Insight: scorpions sweep up and down across your path; watch the rhythm and slip through.",
+  "map": [
+    "###############",
+    "###Z###z###Z###",
+    "#P  *   *   *E#",
+    "### ### ### ###",
+    "###############"
+  ],
+  "solution": "UURRRRRRRRRRRR"
+}

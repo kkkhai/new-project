@@ -37,4 +37,24 @@ export const COLORS = {
   spider: 0x3a2a3a,
   monkey: 0x8d5a2b,
   idol: 0x7d7468,
+  crumble: 0xb08850,
+  crumbling: 0x7a5530,
+  quicksand: 0xc2a060,
+  quicksandSwirl: 0x8a6a38,
+  packedSand: 0xd8b878,
+  dart: 0x8a3020,
+  dartWarn: 0xff5030,
+  sand: 0xe0c080,
+  scorpion: 0xc0602a,
+  scarab: 0x2a6a6a,
+  mummy: 0xd8d0b0,
+  serpent: 0xc8a030,
 } as const;
+
+/** Per-world tint for the basic tiles so each world reads differently even with placeholder art. */
+export const WORLD_TINT: Record<string, { floor: number; wall: number; wallEdge: number; dirt: number; dirtSpeck: number }> = {
+  test: { floor: 0x2a2420, wall: 0x6a5a48, wallEdge: 0x4a3e32, dirt: 0x6b4f2a, dirtSpeck: 0x8a6a3a },
+  jungle: { floor: 0x1f2a1c, wall: 0x5a6a48, wallEdge: 0x3a4a30, dirt: 0x5b4a26, dirtSpeck: 0x7a6a3a },
+  desert: { floor: 0x3a2e1e, wall: 0xa08060, wallEdge: 0x7a5e40, dirt: 0x8a6a3a, dirtSpeck: 0xb08a50 },
+  snow: { floor: 0x2a3440, wall: 0x8a9aaa, wallEdge: 0x5a6a7a, dirt: 0x6a7a8a, dirtSpeck: 0x9aaaba },
+};

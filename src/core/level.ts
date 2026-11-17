@@ -52,9 +52,21 @@ export const LEGEND: Readonly<Record<string, Cell>> = {
   W: { terrain: 'floor', actor: 'spider', dir: 'down' },
   M: { terrain: 'floor', actor: 'monkey', dir: 'right' },
   B: { terrain: 'floor', actor: 'idol', dir: 'right' },
+  c: { terrain: 'crumble' },
+  q: { terrain: 'quicksand' },
+  '%': { terrain: 'packedSand' },
+  o: { terrain: 'floor', obj: 'sand' },
+  u: { terrain: 'floor', obj: 'shovel' },
+  '>': { terrain: 'dartRight' },
+  '<': { terrain: 'dartLeft' },
+  Z: { terrain: 'floor', actor: 'scorpion', dir: 'down' },
+  z: { terrain: 'floor', actor: 'scorpion', dir: 'up' },
+  A: { terrain: 'floor', actor: 'scarab', dir: 'left' },
+  U: { terrain: 'floor', actor: 'mummy', dir: 'left' },
+  Y: { terrain: 'floor', actor: 'serpent', dir: 'left' },
 };
 
-const ACTOR_HP: Partial<Record<ActorKind, number>> = { idol: 3 };
+const ACTOR_HP: Partial<Record<ActorKind, number>> = { idol: 3, serpent: 3 };
 
 export interface ParseOptions {
   hearts?: number;
@@ -82,6 +94,8 @@ export function parseLevel(def: LevelDef, opts: ParseOptions = {}): GameState {
     leverOn: false,
     tools: { machete: false, shovel: false, pickaxe: false },
     actors: [],
+    timers: {},
+    sinking: 0,
     tick: 0,
     status: 'playing',
     nextId: 1,
@@ -99,7 +113,7 @@ export function parseLevel(def: LevelDef, opts: ParseOptions = {}): GameState {
       if (cell.actor) {
         s.actors.push({
           id: s.nextId++, kind: cell.actor, x, y, dir: cell.dir ?? 'right', alive: true,
-          wait: 0, hp: ACTOR_HP[cell.actor] ?? 1, homeY: y, carrying: 0, mode: 'idle',
+          wait: 0, hp: ACTOR_HP[cell.actor] ?? 1, homeX: x, homeY: y, carrying: 0, mode: 'idle',
         });
       }
       if (cell.player) {

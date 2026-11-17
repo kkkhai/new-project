@@ -1,0 +1,19 @@
+{
+  "id": "D-01",
+  "name": "Sand Gate",
+  "world": "desert",
+  "quota": 3,
+  "parTimeSec": 30,
+  "tools": [
+    "machete"
+  ],
+  "notes": "Insight: the shovel (Space) digs packed sand and fills quicksand. Two quicksand steps are safe; a third sinks you.",
+  "map": [
+    "#############",
+    "#P u %* qqq*#",
+    "#####%#######",
+    "#E  *       #",
+    "#############"
+  ],
+  "solution": "RRRXRDXRRRXRRRLLLLLLDDLLLL"
+}

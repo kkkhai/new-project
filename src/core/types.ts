@@ -22,7 +22,13 @@ export type Terrain =
   | 'gate' // open while any plate is pressed or the lever is on
   | 'vines' // blocks everything; the machete cuts it
   | 'thorns' // hurts on touch; the machete cuts it
-  | 'water'; // river: blocks the player; a boulder dropped or pushed in makes a bridge
+  | 'water' // river: blocks the player; a boulder dropped or pushed in makes a bridge
+  | 'crumble' // floor that starts collapsing when the player leaves it
+  | 'crumbling' // collapsing: becomes a pit when its timer runs out
+  | 'quicksand' // stand on it for 3 ticks and you sink; the shovel fills it
+  | 'packedSand' // blocks until dug with the shovel
+  | 'dartRight' // wall trap that fires a dart along its row every DART_PERIOD ticks
+  | 'dartLeft';
 
 /** Things that occupy a cell and can move or be picked up. */
 export type ObjKind =
@@ -34,7 +40,8 @@ export type ObjKind =
   | 'heart'
   | 'machete'
   | 'shovel'
-  | 'pickaxe';
+  | 'pickaxe'
+  | 'sand'; // falls like a boulder but never crushes and does not roll
 
 export type ToolKind = 'machete' | 'shovel' | 'pickaxe';
 
@@ -42,7 +49,11 @@ export type ActorKind =
   | 'snake' // patrols left/right, reverses at obstacles
   | 'spider' // hangs still; drops when the player passes below, then climbs back
   | 'monkey' // patrols; steals a diamond on contact, drops it when crushed
-  | 'idol'; // Jungle boss: patrols slowly, takes a hit from each falling boulder
+  | 'idol' // Jungle boss: patrols slowly, takes a hit from each falling boulder
+  | 'scorpion' // patrols up/down, reverses at obstacles
+  | 'scarab' // chases the player when within 5 tiles
+  | 'mummy' // slowly chases the player anywhere
+  | 'serpent'; // Desert boss: chases; falls when a crumbling floor collapses under it
 
 export interface Actor {
   id: number;
@@ -54,6 +65,7 @@ export interface Actor {
   /** Ticks until the next move. */
   wait: number;
   hp: number;
+  homeX: number;
   homeY: number;
   carrying: number;
   mode: 'idle' | 'drop' | 'climb';
@@ -100,7 +112,10 @@ export type GameEventType =
   | 'steal'
   | 'bossHit'
   | 'bossDefeated'
-  | 'bitten';
+  | 'bitten'
+  | 'sink'
+  | 'dart'
+  | 'collapse';
 
 /** Events produced by a tick, used by the renderer for sound and effects. */
 export interface GameEvent {
@@ -108,6 +123,8 @@ export interface GameEvent {
   x: number;
   y: number;
   kind?: string;
+  /** For darts: where the dart stopped. */
+  toX?: number;
 }
 
 export interface GameState {
@@ -126,6 +143,10 @@ export interface GameState {
   leverOn: boolean;
   tools: Record<ToolKind, boolean>;
   actors: Actor[];
+  /** Countdown per cell index for collapsing floors. */
+  timers: Record<number, number>;
+  /** Consecutive ticks the player has stood in quicksand. */
+  sinking: number;
   tick: number;
   status: GameStatus;
   nextId: number;
