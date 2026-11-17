@@ -1,0 +1,17 @@
+{
+  "id": "T-02",
+  "name": "Rolling Stones",
+  "world": "test",
+  "quota": 4,
+  "notes": "Insight: a boulder resting on your head is safe; walking away lets it fall.",
+  "map": [
+    "############",
+    "#P.O.O.O..*#",
+    "#.........*#",
+    "#*.O..O..O.#",
+    "#*.........#",
+    "##########E#",
+    "############"
+  ],
+  "solution": "DDDRRRRRRRRRUUUDDDD"
+}
