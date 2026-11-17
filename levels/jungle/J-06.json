@@ -1,0 +1,20 @@
+{
+  "id": "J-06",
+  "name": "River Crossing",
+  "world": "jungle",
+  "quota": 3,
+  "parTimeSec": 30,
+  "tools": [
+    "machete"
+  ],
+  "notes": "Insight: dig out the dirt under a boulder and step aside so it drops into the river as a bridge; you need two bridges.",
+  "map": [
+    "#############",
+    "#P  O   O   #",
+    "#...........#",
+    "#~~~~~~~~~~~#",
+    "#*  * # *  E#",
+    "#############"
+  ],
+  "solution": "DRRRLDRDDLLLRRRUURRRRLDRDDRRR"
+}

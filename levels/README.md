@@ -33,7 +33,9 @@ File name = level id, e.g. `jungle/J-05.json`.
 | --- | --- |
 | `quota` | Diamonds needed to open the exit |
 | `notes` | The room's one insight (design checklist) |
-| `solution` | Moves that win the level: `U D L R`, `.` = wait one tick. CI replays it on every pull request. |
+| `parTimeSec` | Par time for 2 stars |
+| `tools` | Tools already owned at the start (earned in earlier levels), e.g. `["machete"]` |
+| `solution` | Moves that win the level: `U D L R`, `X` = use tool, `.` = wait one tick. CI replays it on every pull request. |
 
 ## Map legend
 
@@ -57,6 +59,14 @@ File name = level id, e.g. `jungle/J-05.json`.
 | `=` | Pressure plate (a boulder or the player holds it down) |
 | `/` | Lever (bump it to toggle) |
 | `G` | Gate (open while any plate is pressed or the lever is on) |
+| `v` | Vines (blocks; cut with the machete) |
+| `t` | Thorn bush (hurts on touch; cut with the machete) |
+| `~` | River water (blocks the player; a boulder dropped or pushed in becomes a bridge) |
+| `m` | Machete pickup |
+| `S` / `s` | Snake, starts moving right / left |
+| `W` | Spider (hangs; drops when you pass below) |
+| `M` | Monkey (steals a diamond on contact) |
+| `B` | Stone Idol Guardian (Jungle boss, 3 hits) |
 
 More characters are added as new tiles arrive; `src/core/level.ts` (`LEGEND`) is the source of truth.
 
@@ -68,4 +78,10 @@ node tools/solver/solve.ts levels/test/T-01.json --write  # ...and save it into 
 npm run verify-levels                                     # replay every stored solution
 ```
 
-The solver is breadth-first, so it only handles small rooms. For large levels, write the solution by hand and let `verify-levels` check it.
+The solver is breadth-first, so it only handles small rooms (lots of dirt slows it down). For larger levels use the waypoint router, which finds safe moves between cells you name:
+
+```bash
+node tools/solver/route.ts levels/jungle/J-01.json "4,1 1,3 4,3 7,3 !R X 12,3 12,1 11,1 6,3 !D X 11,5" --write
+```
+
+Waypoints: `x,y` walk there · `X` use the tool · `!MOVES` literal moves.

@@ -16,6 +16,9 @@ export class Session {
   readonly def: LevelDef;
   readonly maxHearts: number;
   state: GameState;
+  /** Deaths and elapsed ticks over the whole attempt (for the results screen). */
+  deaths = 0;
+  ticks = 0;
   private checkpoint: GameState;
 
   constructor(def: LevelDef, maxHearts = 3) {
@@ -28,9 +31,11 @@ export class Session {
   /** Advance one tick. On death the state is already restored when this returns. */
   tick(input: Input = {}): TickResult {
     step(this.state, input);
+    this.ticks++;
     const s = this.state;
     if (s.status === 'won') return 'won';
     if (s.status === 'dead') {
+      this.deaths++;
       const hearts = s.hearts - 1;
       if (hearts <= 0) {
         this.restartLevel();

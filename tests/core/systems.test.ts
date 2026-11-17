@@ -4,10 +4,10 @@ import type { LevelDef } from '../../src/core/level.ts';
 import { objAt, terrainAt } from '../../src/core/grid.ts';
 import { replay } from '../../src/core/replay.ts';
 import { Session } from '../../src/core/session.ts';
-import { parseMoves } from '../../src/core/replay.ts';
+import { parseInputs } from '../../src/core/replay.ts';
 
 const lvl = (map: string[], quota = 0): LevelDef => ({ id: 'T', name: 'test', world: 'test', quota, map });
-const play = (sess: Session, moves: string) => parseMoves(moves).map((dir) => sess.tick({ dir }));
+const play = (sess: Session, moves: string) => parseInputs(moves).map((input) => sess.tick(input));
 
 test('silver key opens a silver door and is used up', () => {
   const s = replay(lvl(['#######', '#Pkdd #', '#######']), 'RRR');

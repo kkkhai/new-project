@@ -6,25 +6,35 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { parseLevel, type LevelDef } from '../../src/core/level.ts';
 import { step } from '../../src/core/tick.ts';
-import { cloneState } from '../../src/core/grid.ts';
-import type { Dir, GameState } from '../../src/core/types.ts';
+import { cloneState, terrainAt } from '../../src/core/grid.ts';
+import { encodeInput } from '../../src/core/replay.ts';
+import { TOOL_TARGETS } from '../../src/core/rules.ts';
+import { DX, DY, type GameState, type Input } from '../../src/core/types.ts';
 
-const ACTIONS: (Dir | null)[] = ['up', 'down', 'left', 'right', null];
-const CODE = (d: Dir | null) => (d ? d[0].toUpperCase() : '.');
+const MOVES: Input[] = [{ dir: 'up' }, { dir: 'down' }, { dir: 'left' }, { dir: 'right' }, {}];
+const ACTION: Input = { action: true };
+
+/** Only try the tool when it would do something (keeps the search small). */
+function inputsFor(s: GameState): Input[] {
+  const t = TOOL_TARGETS[terrainAt(s, s.player.x + DX[s.player.facing], s.player.y + DY[s.player.facing])];
+  return t && s.tools[t.tool] ? [...MOVES, ACTION] : MOVES;
+}
 
 /** Everything that affects the future of the game, excluding counters like tick and ids. */
 export function stateKey(s: GameState): string {
   const parts: string[] = [`${s.player.x},${s.player.y},${s.diamonds}`];
   parts.push(s.terrain.map((t) => t[0] + t[1]).join(''));
+  parts.push(s.player.facing);
   parts.push(s.objs.map((o) => (o ? o.kind.slice(0, 3) + (o.falling ? 'f' : '') : '-')).join(''));
+  parts.push(s.actors.map((a) => `${a.alive ? 1 : 0}${a.x},${a.y},${a.dir[0]},${a.wait},${a.hp},${a.carrying},${a.mode[0]}`).join(';'));
   parts.push(JSON.stringify(extraKey(s)));
   return parts.join('|');
 }
 
 /** Hook for state that lives outside the grid (keys held, enemies, timers). */
 function extraKey(s: GameState): unknown {
-  const { width, height, terrain, objs, player, diamonds, quota, tick, status, nextId, events, ...rest } = s;
-  void [width, height, terrain, objs, player, diamonds, quota, tick, status, nextId, events];
+  const { width, height, terrain, objs, player, diamonds, quota, tick, status, nextId, events, actors, ...rest } = s;
+  void [width, height, terrain, objs, player, diamonds, quota, tick, status, nextId, events, actors];
   return rest;
 }
 
@@ -35,16 +45,16 @@ export function solve(def: LevelDef, maxNodes = 2_000_000): string | null {
   while (frontier.length) {
     const next: typeof frontier = [];
     for (const { s, path } of frontier) {
-      for (const a of ACTIONS) {
+      for (const a of inputsFor(s)) {
         const n = cloneState(s);
-        step(n, { dir: a });
-        if (n.status === 'won') return path + CODE(a);
+        step(n, a);
+        if (n.status === 'won') return path + encodeInput(a);
         if (n.status !== 'playing') continue;
         const k = stateKey(n);
         if (seen.has(k)) continue;
         seen.add(k);
         if (seen.size > maxNodes) return null;
-        next.push({ s: n, path: path + CODE(a) });
+        next.push({ s: n, path: path + encodeInput(a) });
       }
     }
     frontier = next;

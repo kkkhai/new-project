@@ -1,0 +1,20 @@
+{
+  "id": "J-07",
+  "name": "Keys of the Monkey King",
+  "world": "jungle",
+  "quota": 3,
+  "parTimeSec": 30,
+  "tools": [
+    "machete"
+  ],
+  "notes": "Insight: silver key opens the first door, gold key the last. The monkey steals a diamond if it touches you: dodge it or drop the boulder on it.",
+  "map": [
+    "##############",
+    "#P *k#*  O  K#",
+    "#  ..d   .  ##",
+    "######M  *  D#",
+    "############E#",
+    "##############"
+  ],
+  "solution": "RRRDRRDURDRRURURRLDDRD"
+}

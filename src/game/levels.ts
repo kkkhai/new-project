@@ -2,14 +2,28 @@ import type { LevelDef } from '../core/level.ts';
 
 const modules = import.meta.glob<LevelDef>('../../levels/**/*.json', { eager: true, import: 'default' });
 
-/** Order worlds are played in. Levels inside a world sort by id (J-01 … J-10, then J-BOSS). */
-export const WORLD_ORDER = ['test', 'jungle', 'desert', 'snow'];
+/** Worlds in play order. "test" holds the training rooms, which are always open. */
+export const WORLDS = [
+  { id: 'jungle', name: 'Jungle: Lost Temple' },
+  { id: 'desert', name: 'Desert: Sunken Tombs' },
+  { id: 'snow', name: 'Snow: Frozen Peak' },
+] as const;
 
-const worldRank = (w: string) => {
-  const i = WORLD_ORDER.indexOf(w);
-  return i === -1 ? WORLD_ORDER.length : i;
-};
+const byId = (a: LevelDef, b: LevelDef) => a.id.localeCompare(b.id);
 
-export const LEVELS: LevelDef[] = Object.values(modules).sort(
-  (a, b) => worldRank(a.world) - worldRank(b.world) || a.id.localeCompare(b.id),
-);
+export const ALL_LEVELS: LevelDef[] = Object.values(modules);
+
+export const TRAINING: LevelDef[] = ALL_LEVELS.filter((l) => l.world === 'test').sort(byId);
+
+/** Campaign order: each world's levels by id (J-01 … J-10, then J-BOSS). */
+export const CAMPAIGN: LevelDef[] = WORLDS.flatMap((w) => ALL_LEVELS.filter((l) => l.world === w.id).sort(byId));
+
+export const CAMPAIGN_ORDER = CAMPAIGN.map((l) => l.id);
+
+export const levelById = (id: string): LevelDef | undefined => ALL_LEVELS.find((l) => l.id === id);
+
+/** The level that follows `id` in its list (campaign or training), if any. */
+export function nextLevelId(id: string): string | undefined {
+  const list = TRAINING.some((l) => l.id === id) ? TRAINING : CAMPAIGN;
+  return list[list.findIndex((l) => l.id === id) + 1]?.id;
+}

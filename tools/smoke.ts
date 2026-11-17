@@ -43,15 +43,27 @@ const fail = (msg: string) => {
 
 try {
   await page.goto(`http://localhost:${port}/`);
+  await page.waitForTimeout(1500);
+  // Title -> level select -> first campaign level.
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(500);
+  await page.keyboard.press('Enter');
   await page.waitForFunction(() => window.__drr !== undefined, null, { timeout: 15000 });
+  const level = await page.evaluate(() => window.__drr!.levelId());
+  console.log(`ok   started level ${level}`);
   const before = await page.evaluate(() => window.__drr!.state().player);
-  await page.keyboard.down('ArrowDown');
+  await page.keyboard.down('ArrowRight');
   await page.waitForTimeout(250);
-  await page.keyboard.up('ArrowDown');
+  await page.keyboard.up('ArrowRight');
   await page.waitForTimeout(400);
   const after = await page.evaluate(() => window.__drr!.state().player);
-  if (after.y <= before.y) fail(`player did not move down (before y=${before.y}, after y=${after.y})`);
+  if (after.x <= before.x) fail(`player did not move right (before x=${before.x}, after x=${after.x})`);
   else console.log(`ok   player moved from (${before.x},${before.y}) to (${after.x},${after.y})`);
+  // Pause menu opens and closes without errors.
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
 } catch (e) {
   fail(String(e));
 }

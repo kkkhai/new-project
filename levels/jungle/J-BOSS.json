@@ -1,0 +1,20 @@
+{
+  "id": "J-BOSS",
+  "name": "Stone Idol Guardian",
+  "world": "jungle",
+  "quota": 0,
+  "parTimeSec": 30,
+  "tools": [
+    "machete"
+  ],
+  "notes": "Boss: push each boulder down a spike shaft as the idol passes below. Three boulders, three hits; a miss means Restart Room.",
+  "map": [
+    "###############",
+    "#P O  O  O   E#",
+    "####^##^##^####",
+    "#B           ##",
+    "####^##^##^####",
+    "###############"
+  ],
+  "solution": "UUUUUUURRUUUUUURRRUUUURRRRRRR"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "J-05",
+  "name": "The Weight of Gold",
+  "world": "jungle",
+  "quota": 2,
+  "parTimeSec": 30,
+  "tools": [
+    "machete"
+  ],
+  "notes": "Insight: standing on the plate opens the gate only while you stand there; leave a boulder on it instead.",
+  "map": [
+    "#############",
+    "#  O=########",
+    "#.###########",
+    "#P =  G  * E#",
+    "######.######",
+    "######*######",
+    "#############"
+  ],
+  "solution": "UURRLLDDRRRRRDDUURRRRR"
+}

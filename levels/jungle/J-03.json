@@ -1,0 +1,20 @@
+{
+  "id": "J-03",
+  "name": "Heavy Lifting",
+  "world": "jungle",
+  "quota": 2,
+  "parTimeSec": 30,
+  "tools": [
+    "machete"
+  ],
+  "notes": "Insight: push each boulder into a gap so it drops into the river and becomes a bridge.",
+  "map": [
+    "###########",
+    "#P O  O  *#",
+    "#### ## ###",
+    "#~~~~~~~~~#",
+    "#*      E #",
+    "###########"
+  ],
+  "solution": "RRRDDDLLLRRRUUURRRRRLLDDDR"
+}

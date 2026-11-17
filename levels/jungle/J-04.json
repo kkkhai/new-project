@@ -1,0 +1,22 @@
+{
+  "id": "J-04",
+  "name": "Snake Pit",
+  "world": "jungle",
+  "quota": 4,
+  "parTimeSec": 30,
+  "tools": [
+    "machete"
+  ],
+  "notes": "Insight: the snake guards a one-tile corridor you cannot slip past. Time the push so the boulder drops through the spike shaft onto it.",
+  "map": [
+    "#############",
+    "#P O        #",
+    "####^###### #",
+    "#*    S    *#",
+    "#.##^########",
+    "#.###########",
+    "#*   *    E #",
+    "#############"
+  ],
+  "solution": "UUUUUUUUUUUUUUUUUUURRRRRRRRRRDDLLLLLLLLLLDDDRRRRRRRRR"
+}

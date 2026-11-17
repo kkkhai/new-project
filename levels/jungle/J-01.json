@@ -1,0 +1,18 @@
+{
+  "id": "J-01",
+  "name": "Temple Gate",
+  "world": "jungle",
+  "quota": 4,
+  "parTimeSec": 30,
+  "notes": "Insight: dig to diamonds; pick up the machete and cut the vines (Space / X) to reach the exit.",
+  "map": [
+    "##############",
+    "#P..*...#..*.#",
+    "#.####..v.##.#",
+    "#*..m...v...*#",
+    "######v#######",
+    "#     .    E #",
+    "##############"
+  ],
+  "solution": "RRRLLLDDRRRRRRRXRRRRRUULLLDDLLLDXDDRRRRR"
+}
