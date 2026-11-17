@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+.godot/
+.import/
+export_presets.cfg
+*.apk
+*.aab
+*.ipa
+.DS_Store
+.env
