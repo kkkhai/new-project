@@ -1,10 +1,10 @@
-import { DX, DY, type Dir, type GameState, type Input } from './types.ts';
+import { DX, DY, type Dir, type GameState, type Input, type Obj } from './types.ts';
 import { inBounds, objAt, playerAt, setObj, setTerrain, terrainAt } from './grid.ts';
-import { OBJ_RULES, objectCanEnter } from './rules.ts';
+import { OBJ_RULES, objectCanEnter, solidForPlayer } from './rules.ts';
 
 /**
  * Advance the game by one tick. Order (see docs/GDD.md, Technical architecture):
- * player input → pushes → physics (bottom-to-top) → win/death checks.
+ * player input → pushes → physics (bottom-to-top) → triggers → win/death checks.
  * Mutates the state in place; clone first if you need the previous state.
  */
 export function step(s: GameState, input: Input = {}): void {
@@ -13,13 +13,20 @@ export function step(s: GameState, input: Input = {}): void {
   s.tick++;
   if (input.dir) movePlayer(s, input.dir);
   if (s.status === 'playing') physics(s);
+  if (s.status === 'playing') updateGates(s);
 }
 
 export const exitOpen = (s: GameState): boolean => s.diamonds >= s.quota;
 
 /** True if an object could move into (x, y) right now. */
 export function freeForObject(s: GameState, x: number, y: number): boolean {
-  return inBounds(s, x, y) && objectCanEnter(terrainAt(s, x, y)) && !objAt(s, x, y) && !playerAt(s, x, y);
+  return inBounds(s, x, y) && objectCanEnter(terrainAt(s, x, y), s.gateOpen) && !objAt(s, x, y) && !playerAt(s, x, y);
+}
+
+function kill(s: GameState, type: 'crush' | 'spiked' | 'fall', x: number, y: number): void {
+  s.player.alive = false;
+  s.status = 'dead';
+  s.events.push({ type, x, y });
 }
 
 function movePlayer(s: GameState, dir: Dir): void {
@@ -30,8 +37,20 @@ function movePlayer(s: GameState, dir: Dir): void {
   if (!inBounds(s, nx, ny)) return;
   const t = terrainAt(s, nx, ny);
 
-  if (t === 'wall') return;
-
+  if (t === 'lever') {
+    s.leverOn = !s.leverOn;
+    s.events.push({ type: 'lever', x: nx, y: ny });
+    return;
+  }
+  if (solidForPlayer(t)) return;
+  if (t === 'gate' && !s.gateOpen) return;
+  if (t === 'doorSilver' || t === 'doorGold') {
+    const key = t === 'doorSilver' ? 'silver' : 'gold';
+    if (s.keys[key] === 0) return;
+    s.keys[key]--;
+    setTerrain(s, nx, ny, 'floor');
+    s.events.push({ type: 'unlock', x: nx, y: ny, kind: key });
+  }
   if (t === 'exit') {
     if (!exitOpen(s)) return;
     p.x = nx;
@@ -46,16 +65,12 @@ function movePlayer(s: GameState, dir: Dir): void {
     const rule = OBJ_RULES[o.kind];
     if (rule.collectible) {
       setObj(s, nx, ny, null);
-      if (o.kind === 'diamond') {
-        s.diamonds++;
-        if (s.diamonds === s.quota) s.events.push({ type: 'exitOpen', x: nx, y: ny });
-      }
-      s.events.push({ type: 'collect', x: nx, y: ny, kind: o.kind });
+      collect(s, o, nx, ny);
     } else if (rule.pushable && DY[dir] === 0 && !o.falling) {
       const bx = nx + DX[dir];
       if (!freeForObject(s, bx, ny)) return;
       setObj(s, nx, ny, null);
-      setObj(s, bx, ny, o);
+      placeObject(s, o, bx, ny);
       s.events.push({ type: 'push', x: bx, y: ny, kind: o.kind });
     } else {
       return;
@@ -69,6 +84,45 @@ function movePlayer(s: GameState, dir: Dir): void {
   p.x = nx;
   p.y = ny;
   s.events.push({ type: 'step', x: nx, y: ny });
+
+  if (t === 'spikes') kill(s, 'spiked', nx, ny);
+  else if (t === 'pit') kill(s, 'fall', nx, ny);
+  else if (t === 'checkpoint') s.events.push({ type: 'checkpoint', x: nx, y: ny });
+}
+
+function collect(s: GameState, o: Obj, x: number, y: number): void {
+  switch (o.kind) {
+    case 'diamond':
+      s.diamonds++;
+      if (s.diamonds === s.quota) s.events.push({ type: 'exitOpen', x, y });
+      break;
+    case 'redDiamond':
+      s.redDiamonds++;
+      break;
+    case 'keySilver':
+      s.keys.silver++;
+      break;
+    case 'keyGold':
+      s.keys.gold++;
+      break;
+    case 'heart':
+      s.hearts = Math.min(s.maxHearts, s.hearts + 1);
+      break;
+    case 'boulder':
+      break;
+  }
+  s.events.push({ type: 'collect', x, y, kind: o.kind });
+}
+
+/** Put an object into a free cell; a pit swallows it and becomes floor. Returns false if swallowed. */
+function placeObject(s: GameState, o: Obj, x: number, y: number): boolean {
+  if (terrainAt(s, x, y) === 'pit') {
+    setTerrain(s, x, y, 'floor');
+    s.events.push({ type: 'fill', x, y, kind: o.kind });
+    return false;
+  }
+  setObj(s, x, y, o);
+  return true;
 }
 
 function physics(s: GameState): void {
@@ -88,41 +142,65 @@ function updateGravityObject(s: GameState, x: number, y: number, moved: Set<numb
   const rule = OBJ_RULES[o.kind];
   const wasFalling = o.falling;
 
-  // 1. Fall straight down.
+  // 1. Fall straight down (into a pit: fill it).
   if (freeForObject(s, x, y + 1)) {
     setObj(s, x, y, null);
-    setObj(s, x, y + 1, o);
     o.falling = true;
     moved.add(o.id);
+    placeObject(s, o, x, y + 1);
     return;
   }
 
   // 2. Land on the player: a falling crusher kills; a resting object never does.
   if (playerAt(s, x, y + 1)) {
-    if (wasFalling && rule.crushes) {
-      s.player.alive = false;
-      s.status = 'dead';
-      s.events.push({ type: 'crush', x, y: y + 1, kind: o.kind });
-    }
+    if (wasFalling && rule.crushes) kill(s, 'crush', x, y + 1);
     o.falling = false;
     return;
   }
 
-  // 3. Roll off round objects: left first, then right.
+  // 3. A falling boulder breaks a cracked wall it lands on.
+  if (wasFalling && rule.crushes && terrainAt(s, x, y + 1) === 'cracked') {
+    setTerrain(s, x, y + 1, 'floor');
+    s.events.push({ type: 'break', x, y: y + 1 });
+    o.falling = true; // keeps falling next tick
+    return;
+  }
+
+  // 4. Roll off round objects: left first, then right.
   const below = objAt(s, x, y + 1);
   if (below && OBJ_RULES[below.kind].round) {
     for (const dx of [-1, 1]) {
       if (freeForObject(s, x + dx, y) && freeForObject(s, x + dx, y + 1)) {
         setObj(s, x, y, null);
-        setObj(s, x + dx, y, o);
         o.falling = true;
         moved.add(o.id);
+        placeObject(s, o, x + dx, y);
         return;
       }
     }
   }
 
-  // 4. Come to rest.
+  // 5. Come to rest.
   o.falling = false;
   if (wasFalling) s.events.push({ type: 'land', x, y, kind: o.kind });
+}
+
+/** Gates open while any plate is pressed or the lever is on; they never close on something. */
+function updateGates(s: GameState): void {
+  let pressed = s.leverOn;
+  let gateOccupied = false;
+  for (let i = 0; i < s.terrain.length; i++) {
+    const t = s.terrain[i];
+    if (t !== 'plate' && t !== 'gate') continue;
+    const x = i % s.width;
+    const y = (i - x) / s.width;
+    const occupied = !!s.objs[i] || playerAt(s, x, y);
+    if (t === 'plate' && occupied) pressed = true;
+    if (t === 'gate' && occupied) gateOccupied = true;
+  }
+  const open = pressed || (s.gateOpen && gateOccupied);
+  if (open !== s.gateOpen) {
+    s.gateOpen = open;
+    s.events.push({ type: open ? 'gateOpen' : 'gateClose', x: s.player.x, y: s.player.y });
+  }
 }

@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
-import { parseLevel, type LevelDef } from '../core/level.ts';
-import { exitOpen, step } from '../core/tick.ts';
+import type { LevelDef } from '../core/level.ts';
+import { Session } from '../core/session.ts';
+import { exitOpen } from '../core/tick.ts';
 import type { Dir, GameState, Obj } from '../core/types.ts';
 import { LEVELS } from './levels.ts';
 import { COLORS, TILE } from './palette.ts';
@@ -25,7 +26,10 @@ declare global {
 export class GameScene extends Phaser.Scene {
   private levelIndex = 0;
   private def!: LevelDef;
-  private state!: GameState;
+  private session!: Session;
+  private get state(): GameState {
+    return this.session.state;
+  }
   private terrainGfx!: Phaser.GameObjects.Graphics;
   private objViews = new Map<number, Phaser.GameObjects.Shape>();
   private playerView!: Phaser.GameObjects.Rectangle;
@@ -71,7 +75,11 @@ export class GameScene extends Phaser.Scene {
       if (dir) {
         this.heldDirs = [...this.heldDirs.filter((d) => d !== dir), dir];
         this.queuedDir ??= dir;
-      } else if (e.code === 'KeyR') {
+      } else if (e.code === 'KeyR' && !this.pauseTicks) {
+        this.session.restartRoom();
+        this.render(true);
+        this.flash('Room restarted', '#f5e9d0');
+      } else if (e.code === 'KeyL') {
         this.loadLevel(this.levelIndex);
       } else if (e.code === 'KeyN') {
         this.loadLevel((this.levelIndex + 1) % LEVELS.length);
@@ -106,7 +114,7 @@ export class GameScene extends Phaser.Scene {
   private loadLevel(index: number): void {
     this.levelIndex = index;
     this.def = LEVELS[index];
-    this.state = parseLevel(this.def);
+    this.session = new Session(this.def);
     this.pauseTicks = false;
     this.queuedDir = null;
     this.banner.setVisible(false);
@@ -135,19 +143,30 @@ export class GameScene extends Phaser.Scene {
 
   private onTick(): void {
     if (this.pauseTicks) return;
-    step(this.state, { dir: this.nextDir() });
-    this.render(false);
+    const result = this.session.tick({ dir: this.nextDir() });
+    const events = this.state.events;
+    this.render(result === 'respawn' || result === 'gameOver');
 
-    if (this.state.status === 'dead') {
-      this.showBanner('Crushed! Restarting…', '#ff6b6b');
-      this.pauseTicks = true;
-      this.cameras.main.shake(250, 0.01);
-      this.time.delayedCall(900, () => this.loadLevel(this.levelIndex));
-    } else if (this.state.status === 'won') {
+    if (events.some((e) => e.type === 'checkpoint')) this.flash('Checkpoint saved', '#3fbf7f');
+    if (result === 'respawn') {
+      this.cameras.main.shake(200, 0.01);
+      this.flash(`Ouch! ${this.state.hearts} ♥ left`, '#ff6b6b');
+    } else if (result === 'gameOver') {
+      this.cameras.main.shake(300, 0.015);
+      this.flash('Out of hearts: level restarted', '#ff6b6b');
+    } else if (result === 'won') {
       this.showBanner(`${this.def.name} complete!`, '#f0c850');
       this.pauseTicks = true;
       this.time.delayedCall(1200, () => this.loadLevel((this.levelIndex + 1) % LEVELS.length));
     }
+  }
+
+  /** Short message that fades out on its own. */
+  private flash(text: string, color: string): void {
+    this.showBanner(text, color);
+    this.time.delayedCall(900, () => {
+      if (!this.pauseTicks) this.banner.setVisible(false);
+    });
   }
 
   private showBanner(text: string, color: string): void {
@@ -161,9 +180,12 @@ export class GameScene extends Phaser.Scene {
     this.syncObjects(instant);
     this.moveView(this.playerView, this.state.player.x, this.state.player.y, instant);
     this.playerView.setVisible(this.state.player.alive);
+    const st = this.state;
+    const hearts = '♥'.repeat(st.hearts) + '♡'.repeat(Math.max(0, st.maxHearts - st.hearts));
+    const keys = `${st.keys.silver ? ` ⚿×${st.keys.silver}` : ''}${st.keys.gold ? ` ⚷×${st.keys.gold}` : ''}`;
     this.hud.setText(
-      `${this.def.id} ${this.def.name}   ◆ ${this.state.diamonds}/${this.state.quota}` +
-        `${exitOpen(this.state) ? '  EXIT OPEN' : ''}\nArrows/WASD move · R restart · N next level`,
+      `${hearts}   ◆ ${st.diamonds}/${st.quota}${exitOpen(st) ? ' EXIT OPEN' : ''}   ♦ ${st.redDiamonds}${keys}\n` +
+        `${this.def.id} ${this.def.name} · R restart room · L restart level · N next`,
     );
   }
 
@@ -191,6 +213,49 @@ export class GameScene extends Phaser.Scene {
           case 'exit':
             g.fillStyle(COLORS.floor).fillRect(px, py, TILE, TILE);
             g.fillStyle(exitOpen(s) ? COLORS.exitOpen : COLORS.exitClosed).fillRect(px + 4, py + 2, TILE - 8, TILE - 2);
+            break;
+          case 'cracked':
+            g.fillStyle(COLORS.wallEdge).fillRect(px, py, TILE, TILE);
+            g.fillStyle(COLORS.wall).fillRect(px + 2, py + 2, TILE - 4, TILE - 4);
+            g.lineStyle(2, COLORS.cracks).lineBetween(px + 6, py + 4, px + 16, py + 16).lineBetween(px + 16, py + 16, px + 12, py + 28).lineBetween(px + 16, py + 16, px + 27, py + 20);
+            break;
+          case 'spikes':
+            g.fillStyle(COLORS.floor).fillRect(px, py, TILE, TILE);
+            g.fillStyle(COLORS.spikes);
+            for (const sx of [2, 12, 22]) g.fillTriangle(px + sx, py + 28, px + sx + 4, py + 6, px + sx + 8, py + 28);
+            break;
+          case 'pit':
+            g.fillStyle(COLORS.floor).fillRect(px, py, TILE, TILE);
+            g.fillStyle(COLORS.pit).fillRect(px + 2, py + 2, TILE - 4, TILE - 4);
+            break;
+          case 'checkpoint':
+            g.fillStyle(COLORS.floor).fillRect(px, py, TILE, TILE);
+            g.fillStyle(COLORS.checkpoint).fillRect(px + 12, py + 4, 8, 24).fillTriangle(px + 8, py + 10, px + 16, py + 2, px + 24, py + 10);
+            break;
+          case 'doorSilver':
+          case 'doorGold':
+            g.fillStyle(COLORS.wallEdge).fillRect(px, py, TILE, TILE);
+            g.fillStyle(s.terrain[y * s.width + x] === 'doorGold' ? COLORS.keyGold : COLORS.keySilver).fillRect(px + 4, py + 2, TILE - 8, TILE - 2);
+            g.fillStyle(COLORS.wallEdge).fillCircle(px + 16, py + 14, 4).fillRect(px + 14, py + 16, 4, 8);
+            break;
+          case 'plate': {
+            const pressed = !!s.objs[y * s.width + x] || (s.player.x === x && s.player.y === y);
+            g.fillStyle(COLORS.floor).fillRect(px, py, TILE, TILE);
+            g.fillStyle(pressed ? COLORS.plateDown : COLORS.plate).fillRect(px + 4, py + 4, TILE - 8, TILE - 8);
+            break;
+          }
+          case 'lever':
+            g.fillStyle(COLORS.wallEdge).fillRect(px, py, TILE, TILE);
+            g.lineStyle(4, COLORS.lever).lineBetween(px + 16, py + 26, s.leverOn ? px + 26 : px + 6, py + 6);
+            break;
+          case 'gate':
+            g.fillStyle(COLORS.floor).fillRect(px, py, TILE, TILE);
+            if (!s.gateOpen) {
+              g.fillStyle(COLORS.gate);
+              for (const bx of [4, 13, 22]) g.fillRect(px + bx, py, 6, TILE);
+            } else {
+              g.lineStyle(1, COLORS.gate).strokeRect(px + 1, py + 1, TILE - 2, TILE - 2);
+            }
             break;
         }
       }
@@ -220,14 +285,23 @@ export class GameScene extends Phaser.Scene {
   }
 
   private makeObjView(o: Obj): Phaser.GameObjects.Shape {
+    const gem = (color: number) =>
+      this.add.polygon(0, 0, [10, 0, 20, 12, 10, 24, 0, 12], color).setStrokeStyle(2, 0xffffff, 0.6).setDepth(5);
     switch (o.kind) {
       case 'boulder':
         return this.add.circle(0, 0, TILE / 2 - 2, COLORS.boulder).setStrokeStyle(2, COLORS.boulderEdge).setDepth(5);
       case 'diamond':
+        return gem(COLORS.diamond);
+      case 'redDiamond':
+        return gem(COLORS.redDiamond);
+      case 'keySilver':
+      case 'keyGold':
         return this.add
-          .polygon(0, 0, [10, 0, 20, 12, 10, 24, 0, 12], COLORS.diamond)
-          .setStrokeStyle(2, 0xffffff, 0.6)
+          .rectangle(0, 0, 18, 10, o.kind === 'keyGold' ? COLORS.keyGold : COLORS.keySilver)
+          .setStrokeStyle(2, 0x000000, 0.5)
           .setDepth(5);
+      case 'heart':
+        return this.add.star(0, 0, 5, 5, 11, COLORS.heart).setDepth(5);
     }
   }
 

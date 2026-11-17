@@ -46,6 +46,17 @@ File name = level id, e.g. `jungle/J-05.json`.
 | `E` | Exit gate (opens at the quota) |
 | `O` | Boulder |
 | `*` | Diamond |
+| `r` | Red diamond (secret, not part of the quota) |
+| `x` | Cracked wall (breaks when a falling boulder lands on it) |
+| `^` | Spikes |
+| `_` | Pit (an object that falls or is pushed in fills it) |
+| `C` | Checkpoint totem |
+| `k` / `K` | Silver / gold key |
+| `d` / `D` | Silver / gold locked door |
+| `h` | Heart |
+| `=` | Pressure plate (a boulder or the player holds it down) |
+| `/` | Lever (bump it to toggle) |
+| `G` | Gate (open while any plate is pressed or the lever is on) |
 
 More characters are added as new tiles arrive; `src/core/level.ts` (`LEGEND`) is the source of truth.
 

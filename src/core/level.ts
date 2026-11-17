@@ -28,11 +28,28 @@ export const LEGEND: Readonly<Record<string, Cell>> = {
   P: { terrain: 'floor', player: true },
   O: { terrain: 'floor', obj: 'boulder' },
   '*': { terrain: 'floor', obj: 'diamond' },
+  r: { terrain: 'floor', obj: 'redDiamond' },
+  x: { terrain: 'cracked' },
+  '^': { terrain: 'spikes' },
+  _: { terrain: 'pit' },
+  C: { terrain: 'checkpoint' },
+  k: { terrain: 'floor', obj: 'keySilver' },
+  K: { terrain: 'floor', obj: 'keyGold' },
+  d: { terrain: 'doorSilver' },
+  D: { terrain: 'doorGold' },
+  h: { terrain: 'floor', obj: 'heart' },
+  '=': { terrain: 'plate' },
+  '/': { terrain: 'lever' },
+  G: { terrain: 'gate' },
 };
+
+export interface ParseOptions {
+  hearts?: number;
+}
 
 export class LevelError extends Error {}
 
-export function parseLevel(def: LevelDef): GameState {
+export function parseLevel(def: LevelDef, opts: ParseOptions = {}): GameState {
   const height = def.map.length;
   if (height === 0) throw new LevelError(`${def.id}: map is empty`);
   const width = def.map[0].length;
@@ -44,6 +61,12 @@ export function parseLevel(def: LevelDef): GameState {
     player: { x: -1, y: -1, facing: 'down', alive: true },
     diamonds: 0,
     quota: def.quota,
+    redDiamonds: 0,
+    hearts: opts.hearts ?? 3,
+    maxHearts: opts.hearts ?? 3,
+    keys: { silver: 0, gold: 0 },
+    gateOpen: false,
+    leverOn: false,
     tick: 0,
     status: 'playing',
     nextId: 1,
