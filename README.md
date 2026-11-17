@@ -7,7 +7,7 @@ All names, art and levels are original; only the genre and mechanics are borrowe
 - **Platforms:** web, iOS and Android
 - **Scope (draft):** 3 worlds × 10 levels + 1 boss each = 33 stages
 - **Engine:** Phaser 3 + TypeScript (Vite); iOS/Android via Capacitor later
-- **Status:** M3: Jungle and Desert worlds playable (22 stages)
+- **Status:** M4: all three worlds playable (33 stages)
 
 ## Documents
 

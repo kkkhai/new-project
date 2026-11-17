@@ -45,6 +45,8 @@ const SYNTH: Record<string, Synth[]> = {
   click: [{ freq: 900, dur: 0.03, type: 'square', vol: 0.04 }],
   dart: [{ freq: 2000, to: 600, dur: 0.12, type: 'sawtooth', vol: 0.04 }],
   collapse: [{ freq: 0, dur: 0.3, noise: true, vol: 0.07 }],
+  crack: [{ freq: 1800, to: 900, dur: 0.06, type: 'square', vol: 0.04 }],
+  shatter: [{ freq: 0, dur: 0.2, noise: true, vol: 0.1 }, { freq: 2400, to: 1200, dur: 0.15, type: 'triangle', vol: 0.05 }],
 };
 
 /** Which sound each game event plays. */

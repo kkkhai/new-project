@@ -1,0 +1,21 @@
+{
+  "id": "S-08",
+  "name": "Yeti Corridor",
+  "world": "snow",
+  "quota": 2,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel",
+    "pickaxe"
+  ],
+  "notes": "Insight: a yeti cub charges the moment it sees you along a line. Bait it, step aside, and slip past while it recovers.",
+  "map": [
+    "##############",
+    "#P     #   * #",
+    "#  #   H     #",
+    "#* #   #   E #",
+    "##############"
+  ],
+  "solution": "DDUURRRDURDRRRRRRD"
+}

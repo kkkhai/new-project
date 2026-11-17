@@ -49,6 +49,16 @@ export const COLORS = {
   scarab: 0x2a6a6a,
   mummy: 0xd8d0b0,
   serpent: 0xc8a030,
+  ice: 0x9fd8f0,
+  iceShine: 0xe8f8ff,
+  thinIce: 0xc8e8f8,
+  icyWater: 0x123a66,
+  iceWall: 0x7ab8e0,
+  iceBlock: 0xb8e4ff,
+  snowball: 0xf4f8ff,
+  bat: 0x4a3a6a,
+  yeti: 0xe8ecf0,
+  frost: 0x80e0ff,
 } as const;
 
 /** Per-world tint for the basic tiles so each world reads differently even with placeholder art. */

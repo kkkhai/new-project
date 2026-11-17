@@ -77,6 +77,17 @@ File name = level id, e.g. `jungle/J-05.json`.
 | `A` | Scarab (chases when you're within 5 tiles) |
 | `U` | Mummy (slowly chases you) |
 | `Y` | Pharaoh's Sand Serpent (Desert boss: falls when crumbling floor collapses under it) |
+| `i` | Ice (you and pushed objects slide until stopped) |
+| `j` | Thin ice (cracks when you step off; breaks into icy water the second time) |
+| `w` | Icy water (deadly; an object pushed or dropped in freezes it solid) |
+| `I` | Ice wall (pickaxe breaks it; the Great Yeti shatters it by charging into it) |
+| `Q` | Ice block (pushable, slides, never crushes; pickaxe breaks it) |
+| `n` / `N` | Snowball / big snowball (a snowball grows after rolling 3 tiles; big ones crush and can't be pushed) |
+| `a` | Pickaxe pickup |
+| `V` | Ice bat (zigzags, flies over pits and water) |
+| `H` | Yeti cub (charges when it sees you along a line) |
+| `F` | Frost spirit (patrols, turns floor to ice behind it) |
+| `T` | The Great Yeti (Snow boss: hurt each time it charges into an ice wall) |
 
 More characters are added as new tiles arrive; `src/core/level.ts` (`LEGEND`) is the source of truth.
 

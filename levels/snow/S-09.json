@@ -1,0 +1,21 @@
+{
+  "id": "S-09",
+  "name": "Hall of the Frost Spirit",
+  "world": "snow",
+  "quota": 2,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel",
+    "pickaxe"
+  ],
+  "notes": "Insight: the frost spirit leaves ice in its wake; use the new ice to slide where you couldn't walk in time.",
+  "map": [
+    "##############",
+    "#P  F     #* #",
+    "#   .....    #",
+    "#*       #  E#",
+    "##############"
+  ],
+  "solution": "DDURRRRRRRRRDRR"
+}

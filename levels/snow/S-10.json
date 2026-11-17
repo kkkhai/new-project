@@ -1,0 +1,23 @@
+{
+  "id": "S-10",
+  "name": "Frozen Peak",
+  "world": "snow",
+  "quota": 3,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel",
+    "pickaxe"
+  ],
+  "notes": "Exam: ice walls, sliding, thin ice, a snowball and a bat.",
+  "map": [
+    "###############",
+    "#Pa I iiii  n #",
+    "#####j######  #",
+    "#*  jj    V  *#",
+    "#### #######_##",
+    "#E          * #",
+    "###############"
+  ],
+  "solution": "RRXRRDDLLLLRRRDDRRRRRRRRUURLDDLLLLLLLLLLL"
+}

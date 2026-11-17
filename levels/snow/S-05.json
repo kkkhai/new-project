@@ -1,0 +1,22 @@
+{
+  "id": "S-05",
+  "name": "Snowball Drop",
+  "world": "snow",
+  "quota": 2,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel",
+    "pickaxe"
+  ],
+  "notes": "Insight: a snowball grows after rolling three tiles. A big one smashes the cracked floor below.",
+  "map": [
+    "############",
+    "#Pn   ######",
+    "##### ######",
+    "#E * x  *  #",
+    "#####_######",
+    "############"
+  ],
+  "solution": "RRRURDDRRRLLLLLLL"
+}

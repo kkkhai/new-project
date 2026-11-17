@@ -1,0 +1,23 @@
+{
+  "id": "S-BOSS",
+  "name": "The Great Yeti",
+  "world": "snow",
+  "quota": 0,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel",
+    "pickaxe"
+  ],
+  "notes": "Boss: the Great Yeti charges whenever it sees you. Step aside so it slams into an ice wall: each wall shatters and hurts it. Three walls, three hits.",
+  "map": [
+    "#############",
+    "#     I     #",
+    "#  #     #  #",
+    "#I    T    I#",
+    "#  #     #  #",
+    "#P         E#",
+    "#############"
+  ],
+  "solution": "URUUUUUUUUUUUUURRDDUUUUUUUUUUUUDRRRURRRLUUUULDDDDRRR"
+}

@@ -31,6 +31,8 @@ Allowed licences: CC0, Pixabay License, Sonniss GDC bundle. Add every file to `C
 | `click` | menu button | Kenney Interface Sounds |
 | `dart` | a dart trap fires | Pixabay |
 | `collapse` | crumbling floor gives way | Pixabay |
+| `crack` | thin ice cracks | Pixabay |
+| `shatter` | ice wall or ice block breaks | Sonniss bundle |
 
 ## Music: `music/<name>.ogg` (or `.mp3`), loops while playing
 

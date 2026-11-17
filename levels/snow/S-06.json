@@ -1,0 +1,20 @@
+{
+  "id": "S-06",
+  "name": "Frozen Lake",
+  "world": "snow",
+  "quota": 1,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel",
+    "pickaxe"
+  ],
+  "notes": "Insight: blocks slide across ice too. Send them into the water to build a crossing.",
+  "map": [
+    "#############",
+    "#P Q iiiww  #",
+    "#  Q iiiw *E#",
+    "#############"
+  ],
+  "solution": "DRRRRUUURRR"
+}
