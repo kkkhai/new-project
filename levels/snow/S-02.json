@@ -1,0 +1,21 @@
+{
+  "id": "S-02",
+  "name": "Slippery Slope",
+  "world": "snow",
+  "quota": 2,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel",
+    "pickaxe"
+  ],
+  "notes": "Insight: on ice you can only stop against something. Pick your stopping points to reach each diamond.",
+  "map": [
+    "#########",
+    "#P iiii*#",
+    "#######i#",
+    "#*iiiiii#",
+    "#E#######"
+  ],
+  "solution": "RRUUUUDUULUUUUUD"
+}

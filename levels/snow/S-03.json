@@ -1,0 +1,21 @@
+{
+  "id": "S-03",
+  "name": "Thin Ice",
+  "world": "snow",
+  "quota": 2,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel",
+    "pickaxe"
+  ],
+  "notes": "Insight: thin ice cracks when you step off it and breaks the second time. Plan a path that never needs a tile three times.",
+  "map": [
+    "##########",
+    "#P jjjj *#",
+    "#  j  j  #",
+    "#* jjjj E#",
+    "##########"
+  ],
+  "solution": "DDURRRRRRRD"
+}

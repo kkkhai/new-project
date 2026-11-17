@@ -64,9 +64,21 @@ export const LEGEND: Readonly<Record<string, Cell>> = {
   A: { terrain: 'floor', actor: 'scarab', dir: 'left' },
   U: { terrain: 'floor', actor: 'mummy', dir: 'left' },
   Y: { terrain: 'floor', actor: 'serpent', dir: 'left' },
+  i: { terrain: 'ice' },
+  j: { terrain: 'thinIce' },
+  w: { terrain: 'icyWater' },
+  I: { terrain: 'iceWall' },
+  Q: { terrain: 'floor', obj: 'iceBlock' },
+  n: { terrain: 'floor', obj: 'snowball' },
+  N: { terrain: 'floor', obj: 'bigSnowball' },
+  a: { terrain: 'floor', obj: 'pickaxe' },
+  V: { terrain: 'floor', actor: 'bat', dir: 'right' },
+  H: { terrain: 'floor', actor: 'yetiCub', dir: 'left' },
+  F: { terrain: 'floor', actor: 'frostSpirit', dir: 'right' },
+  T: { terrain: 'floor', actor: 'yeti', dir: 'left' },
 };
 
-const ACTOR_HP: Partial<Record<ActorKind, number>> = { idol: 3, serpent: 3 };
+const ACTOR_HP: Partial<Record<ActorKind, number>> = { idol: 3, serpent: 3, yeti: 3 };
 
 export interface ParseOptions {
   hearts?: number;

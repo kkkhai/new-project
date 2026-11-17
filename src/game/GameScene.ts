@@ -231,6 +231,7 @@ export class GameScene extends Phaser.Scene {
     if (tool) this.flash(TOOL_HINT[tool.kind ?? ''] ?? 'New tool!', '#f0c850', 2200);
     for (const e of events) if (e.type === 'dart') this.drawDart(e.x, e.y, e.toX ?? e.x);
     if (events.some((e) => e.type === 'steal')) this.flash('The monkey stole a diamond!', '#ff9f43');
+    if (events.some((e) => e.type === 'grow')) this.flash('The snowball grew!', '#e8f8ff');
     if (events.some((e) => e.type === 'bossDefeated')) this.flash('The guardian falls! The exit is open', '#f0c850', 1800);
     else if (events.some((e) => e.type === 'bossHit')) this.cameras.main.shake(250, 0.012);
 
@@ -462,6 +463,24 @@ export class GameScene extends Phaser.Scene {
             g.fillStyle(COLORS.quicksandSwirl);
             for (const [sx, sy] of [[5, 6], [18, 9], [10, 20], [24, 24]]) g.fillRect(px + sx, py + sy, 4, 2);
             break;
+          case 'ice':
+            g.fillStyle(COLORS.ice).fillRect(px, py, TILE, TILE);
+            g.lineStyle(2, COLORS.iceShine, 0.8).lineBetween(px + 5, py + 24, px + 14, py + 15).lineBetween(px + 18, py + 12, px + 24, py + 6);
+            break;
+          case 'thinIce':
+          case 'crackedIce':
+            g.fillStyle(COLORS.icyWater).fillRect(px, py, TILE, TILE);
+            g.fillStyle(COLORS.thinIce, t === 'thinIce' ? 0.9 : 0.55).fillRect(px + 1, py + 1, TILE - 2, TILE - 2);
+            if (t === 'crackedIce') g.lineStyle(2, 0x123a66).lineBetween(px + 4, py + 6, px + 16, py + 16).lineBetween(px + 16, py + 16, px + 28, py + 10).lineBetween(px + 16, py + 16, px + 12, py + 28);
+            break;
+          case 'icyWater':
+            g.fillStyle(COLORS.icyWater).fillRect(px, py, TILE, TILE);
+            g.lineStyle(2, COLORS.ice, 0.6).lineBetween(px + 4, py + 12, px + 14, py + 12).lineBetween(px + 16, py + 22, px + 28, py + 22);
+            break;
+          case 'iceWall':
+            g.fillStyle(COLORS.iceWall).fillRect(px, py, TILE, TILE);
+            g.lineStyle(2, COLORS.iceShine).strokeRect(px + 3, py + 3, TILE - 6, TILE - 6).lineBetween(px + 8, py + 24, px + 22, py + 8);
+            break;
           case 'dartRight':
           case 'dartLeft': {
             g.fillStyle(tint.wallEdge).fillRect(px, py, TILE, TILE);
@@ -508,7 +527,8 @@ export class GameScene extends Phaser.Scene {
       } else {
         this.moveView(view, a.x, a.y, instant);
       }
-      if (a.kind === 'idol' || a.kind === 'serpent') view.setAlpha(0.55 + 0.15 * a.hp);
+      if (a.kind === 'idol' || a.kind === 'serpent' || a.kind === 'yeti') view.setAlpha(0.55 + 0.15 * a.hp);
+      if (a.kind === 'yeti') view.setAngle(a.mode === 'stun' ? 15 : 0);
     }
     this.removeMissing(this.actorViews, seen);
   }
@@ -546,6 +566,12 @@ export class GameScene extends Phaser.Scene {
         return this.add.rectangle(0, 0, 6, 24, COLORS.tool).setAngle(35).setStrokeStyle(2, 0x000000, 0.5).setDepth(5);
       case 'sand':
         return this.add.ellipse(0, 4, TILE - 4, TILE - 10, COLORS.sand).setStrokeStyle(2, COLORS.quicksandSwirl).setDepth(5);
+      case 'iceBlock':
+        return this.add.rectangle(0, 0, TILE - 4, TILE - 4, COLORS.iceBlock, 0.9).setStrokeStyle(2, COLORS.iceShine).setDepth(5);
+      case 'snowball':
+        return this.add.circle(0, 4, 8, COLORS.snowball).setStrokeStyle(2, 0xa0b8d0).setDepth(5);
+      case 'bigSnowball':
+        return this.add.circle(0, 0, TILE / 2 - 1, COLORS.snowball).setStrokeStyle(2, 0xa0b8d0).setDepth(5);
     }
   }
 
@@ -596,6 +622,29 @@ export class GameScene extends Phaser.Scene {
           this.add.circle(-6, -4, 3, 0xff3b30),
           this.add.circle(6, -4, 3, 0xff3b30),
         ]);
+        break;
+      case 'bat':
+        c.add([
+          this.add.triangle(0, 0, -14, -2, -2, -6, -2, 4, COLORS.bat),
+          this.add.triangle(0, 0, 14, -2, 2, -6, 2, 4, COLORS.bat),
+          this.add.circle(0, 0, 6, COLORS.bat),
+          this.add.circle(-2, -1, 1.5, 0xffe000),
+          this.add.circle(2, -1, 1.5, 0xffe000),
+        ]);
+        break;
+      case 'yetiCub':
+      case 'yeti': {
+        const r = a.kind === 'yeti' ? TILE / 2 + 2 : 10;
+        c.add([
+          this.add.circle(0, 0, r, COLORS.yeti).setStrokeStyle(2, 0x8aa0b8),
+          this.add.circle(-r / 3, -r / 4, 2, 0x1a2a6a),
+          this.add.circle(r / 3, -r / 4, 2, 0x1a2a6a),
+          this.add.rectangle(0, r / 3, r, 3, 0x1a2a6a),
+        ]);
+        break;
+      }
+      case 'frostSpirit':
+        c.add([this.add.star(0, 0, 6, 4, 12, COLORS.frost, 0.85), this.add.circle(0, 0, 4, 0xffffff)]);
         break;
       case 'idol':
         c.add([

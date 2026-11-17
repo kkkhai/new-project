@@ -1,0 +1,21 @@
+{
+  "id": "S-07",
+  "name": "Bat Cave",
+  "world": "snow",
+  "quota": 2,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel",
+    "pickaxe"
+  ],
+  "notes": "Insight: bats bob up and down as they fly, even over pits. Wait for the gap.",
+  "map": [
+    "##############",
+    "#P   _V _    #",
+    "#          * #",
+    "#*   _  _   E#",
+    "##############"
+  ],
+  "solution": "DDURRRRRRRRDRRR"
+}

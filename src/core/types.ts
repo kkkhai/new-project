@@ -28,7 +28,12 @@ export type Terrain =
   | 'quicksand' // stand on it for 3 ticks and you sink; the shovel fills it
   | 'packedSand' // blocks until dug with the shovel
   | 'dartRight' // wall trap that fires a dart along its row every DART_PERIOD ticks
-  | 'dartLeft';
+  | 'dartLeft'
+  | 'ice' // slippery: the player and pushed objects slide until something stops them
+  | 'thinIce' // cracks when you step off it; cracked ice turns to icy water the next time
+  | 'crackedIce'
+  | 'icyWater' // deadly to the player; an object pushed or dropped in freezes it solid
+  | 'iceWall'; // breaks with the pickaxe
 
 /** Things that occupy a cell and can move or be picked up. */
 export type ObjKind =
@@ -41,7 +46,10 @@ export type ObjKind =
   | 'machete'
   | 'shovel'
   | 'pickaxe'
-  | 'sand'; // falls like a boulder but never crushes and does not roll
+  | 'sand' // falls like a boulder but never crushes and does not roll
+  | 'iceBlock' // pushable, slides on ice, never crushes; the pickaxe breaks it
+  | 'snowball' // small: pushable and harmless; grows big after rolling 3 tiles
+  | 'bigSnowball'; // crushes like a boulder and is too heavy to push
 
 export type ToolKind = 'machete' | 'shovel' | 'pickaxe';
 
@@ -53,7 +61,11 @@ export type ActorKind =
   | 'scorpion' // patrols up/down, reverses at obstacles
   | 'scarab' // chases the player when within 5 tiles
   | 'mummy' // slowly chases the player anywhere
-  | 'serpent'; // Desert boss: chases; falls when a crumbling floor collapses under it
+  | 'serpent' // Desert boss: chases; falls when a crumbling floor collapses under it
+  | 'bat' // flies left/right in a zigzag, over pits and water
+  | 'yetiCub' // charges in a straight line when it sees you, until it hits something
+  | 'frostSpirit' // patrols and freezes the floor it leaves into ice
+  | 'yeti'; // Snow boss: charges like a cub; stunned after slamming into an ice wall
 
 export interface Actor {
   id: number;
@@ -68,7 +80,7 @@ export interface Actor {
   homeX: number;
   homeY: number;
   carrying: number;
-  mode: 'idle' | 'drop' | 'climb';
+  mode: 'idle' | 'drop' | 'climb' | 'charge' | 'stun';
 }
 
 export interface Obj {
@@ -76,6 +88,10 @@ export interface Obj {
   kind: ObjKind;
   /** True while the object moved down (or rolled) on the previous physics pass. */
   falling: boolean;
+  /** Direction it is sliding on ice, if any. */
+  sliding?: Dir | null;
+  /** Tiles a snowball has rolled (it grows at 3). */
+  rolled?: number;
 }
 
 export interface Player {
@@ -83,6 +99,8 @@ export interface Player {
   y: number;
   facing: Dir;
   alive: boolean;
+  /** Direction the player is sliding on ice; input is ignored until the slide stops. */
+  sliding?: Dir | null;
 }
 
 export type GameStatus = 'playing' | 'won' | 'dead';
@@ -115,7 +133,12 @@ export type GameEventType =
   | 'bitten'
   | 'sink'
   | 'dart'
-  | 'collapse';
+  | 'collapse'
+  | 'freeze'
+  | 'crack'
+  | 'grow'
+  | 'stun'
+  | 'shatter';
 
 /** Events produced by a tick, used by the renderer for sound and effects. */
 export interface GameEvent {

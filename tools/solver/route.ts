@@ -35,7 +35,7 @@ function leg(start: GameState, tx: number, ty: number, maxNodes = 300_000): { s:
         if (n.status === 'dead') continue;
         const p = path + encodeInput(m);
         if ((n.player.x === tx && n.player.y === ty) || n.status === 'won') return { s: n, path: p };
-        const moving = n.objs.some((o) => o?.falling) ? 'f' : '';
+        const moving = (n.objs.some((o) => o?.falling || o?.sliding) ? 'f' : '') + (n.player.sliding ?? '');
         const actors = n.actors.map((a) => `${a.x},${a.y},${a.wait},${a.mode}`).join(';');
         const timers = Object.keys(n.timers).join(',');
         const k = `${n.player.x},${n.player.y},${n.diamonds},${moving},${actors},${n.tick % 8},${timers}`;

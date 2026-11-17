@@ -1,0 +1,20 @@
+{
+  "id": "S-01",
+  "name": "Frozen Gate",
+  "world": "snow",
+  "quota": 2,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel"
+  ],
+  "notes": "Insight: the pickaxe (Space) breaks ice walls. On ice you slide until something stops you.",
+  "map": [
+    "##############",
+    "#P a I iiii *#",
+    "############.#",
+    "#E  *       .#",
+    "##############"
+  ],
+  "solution": "RRRXRRRUUUURDDLLLLLLLLLLL"
+}

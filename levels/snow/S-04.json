@@ -1,0 +1,21 @@
+{
+  "id": "S-04",
+  "name": "Ice Bridge",
+  "world": "snow",
+  "quota": 1,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel",
+    "pickaxe"
+  ],
+  "notes": "Insight: push an ice block into the icy water and it freezes solid.",
+  "map": [
+    "############",
+    "#P Q  Q    #",
+    "####w##w####",
+    "#*   #    E#",
+    "############"
+  ],
+  "solution": "RRRDDLLLRRRUURRRDDRRR"
+}
