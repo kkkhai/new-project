@@ -1,4 +1,4 @@
-import type { GameState, Obj, ObjKind, Terrain } from './types.ts';
+import type { Actor, GameState, Obj, ObjKind, Terrain } from './types.ts';
 
 export const idx = (s: GameState, x: number, y: number): number => y * s.width + x;
 
@@ -24,4 +24,17 @@ export const setObj = (s: GameState, x: number, y: number, o: Obj | null): void 
 
 export const makeObj = (s: GameState, kind: ObjKind): Obj => ({ id: s.nextId++, kind, falling: false });
 
-export const cloneState = (s: GameState): GameState => structuredClone(s);
+/** Fast deep copy (used by checkpoints, undo and the solvers). */
+export const cloneState = (s: GameState): GameState => ({
+  ...s,
+  terrain: s.terrain.slice(),
+  objs: s.objs.map((o) => (o ? { ...o } : null)),
+  player: { ...s.player },
+  keys: { ...s.keys },
+  tools: { ...s.tools },
+  actors: s.actors.map((a) => ({ ...a })),
+  events: s.events.slice(),
+});
+
+export const actorAt = (s: GameState, x: number, y: number): Actor | undefined =>
+  s.actors.find((a) => a.alive && a.x === x && a.y === y);

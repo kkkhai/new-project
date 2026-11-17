@@ -1,0 +1,20 @@
+{
+  "id": "J-08",
+  "name": "Spider Hall",
+  "world": "jungle",
+  "quota": 3,
+  "parTimeSec": 30,
+  "tools": [
+    "machete"
+  ],
+  "notes": "Insight: a spider two tiles up can't catch you if you keep walking, but don't stop under it. The one hanging just above the floor is deadly: dig the tunnel under it.",
+  "map": [
+    "###############",
+    "###W##W########",
+    "### ## ###W####",
+    "#P   *  *   *E#",
+    "#########...###",
+    "###############"
+  ],
+  "solution": "RRRRRRRRDRRURR"
+}

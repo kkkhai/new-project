@@ -1,0 +1,22 @@
+{
+  "id": "J-02",
+  "name": "Rolling Stones",
+  "world": "jungle",
+  "quota": 5,
+  "parTimeSec": 30,
+  "tools": [
+    "machete"
+  ],
+  "notes": "Insight: don't stand below a boulder you just dug under; boulders roll off each other.",
+  "map": [
+    "##############",
+    "#P.O.O...O.*.#",
+    "#.......O....#",
+    "#..O.*....O..#",
+    "#*...........#",
+    "#....O..O*.*.#",
+    "#.*..........#",
+    "############E#"
+  ],
+  "solution": "DDDDDRUURRURDRRRRDRRDRD"
+}

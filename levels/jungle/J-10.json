@@ -1,0 +1,20 @@
+{
+  "id": "J-10",
+  "name": "Heart of the Temple",
+  "world": "jungle",
+  "quota": 3,
+  "parTimeSec": 30,
+  "tools": [
+    "machete"
+  ],
+  "notes": "Exam: river bridge, vines, key and door, and a snake in a one-tile corridor. Crush it through the spike shaft, or time your way past it from both ends.",
+  "map": [
+    "##################",
+    "#P O   O  v  *  k#",
+    "#### ###^######d##",
+    "####~ *  S    * ##",
+    "#####E##^#########",
+    "##################"
+  ],
+  "solution": "RRRRRRRRXRRRRRRRLDDLRUULLLLLLLLLLLDDRRLD"
+}

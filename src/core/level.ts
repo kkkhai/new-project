@@ -1,5 +1,5 @@
 import { makeObj } from './grid.ts';
-import type { GameState, ObjKind, Terrain } from './types.ts';
+import type { ActorKind, Dir, GameState, ObjKind, Terrain, ToolKind } from './types.ts';
 
 /**
  * A level as stored in levels/<world>/<id>.json.
@@ -7,6 +7,8 @@ import type { GameState, ObjKind, Terrain } from './types.ts';
  */
 export interface LevelDef {
   id: string;
+  /** Tools the player already owns when the level starts (earned in earlier levels). */
+  tools?: ToolKind[];
   name: string;
   world: string;
   quota: number;
@@ -18,7 +20,7 @@ export interface LevelDef {
   notes?: string;
 }
 
-type Cell = { terrain: Terrain; obj?: ObjKind; player?: true };
+type Cell = { terrain: Terrain; obj?: ObjKind; player?: true; actor?: ActorKind; dir?: Dir };
 
 export const LEGEND: Readonly<Record<string, Cell>> = {
   '#': { terrain: 'wall' },
@@ -41,7 +43,18 @@ export const LEGEND: Readonly<Record<string, Cell>> = {
   '=': { terrain: 'plate' },
   '/': { terrain: 'lever' },
   G: { terrain: 'gate' },
+  v: { terrain: 'vines' },
+  t: { terrain: 'thorns' },
+  '~': { terrain: 'water' },
+  m: { terrain: 'floor', obj: 'machete' },
+  S: { terrain: 'floor', actor: 'snake', dir: 'right' },
+  s: { terrain: 'floor', actor: 'snake', dir: 'left' },
+  W: { terrain: 'floor', actor: 'spider', dir: 'down' },
+  M: { terrain: 'floor', actor: 'monkey', dir: 'right' },
+  B: { terrain: 'floor', actor: 'idol', dir: 'right' },
 };
+
+const ACTOR_HP: Partial<Record<ActorKind, number>> = { idol: 3 };
 
 export interface ParseOptions {
   hearts?: number;
@@ -67,6 +80,8 @@ export function parseLevel(def: LevelDef, opts: ParseOptions = {}): GameState {
     keys: { silver: 0, gold: 0 },
     gateOpen: false,
     leverOn: false,
+    tools: { machete: false, shovel: false, pickaxe: false },
+    actors: [],
     tick: 0,
     status: 'playing',
     nextId: 1,
@@ -81,6 +96,12 @@ export function parseLevel(def: LevelDef, opts: ParseOptions = {}): GameState {
       const i = y * width + x;
       s.terrain[i] = cell.terrain;
       if (cell.obj) s.objs[i] = makeObj(s, cell.obj);
+      if (cell.actor) {
+        s.actors.push({
+          id: s.nextId++, kind: cell.actor, x, y, dir: cell.dir ?? 'right', alive: true,
+          wait: 0, hp: ACTOR_HP[cell.actor] ?? 1, homeY: y, carrying: 0, mode: 'idle',
+        });
+      }
       if (cell.player) {
         players++;
         s.player.x = x;
@@ -88,8 +109,11 @@ export function parseLevel(def: LevelDef, opts: ParseOptions = {}): GameState {
       }
     });
   });
+  for (const tool of def.tools ?? []) s.tools[tool] = true;
   if (players !== 1) throw new LevelError(`${def.id}: expected exactly one P, found ${players}`);
   return s;
 }
+
+export const countRedDiamonds = (s: GameState): number => s.objs.filter((o) => o?.kind === 'redDiamond').length;
 
 export const countDiamonds = (s: GameState): number => s.objs.filter((o) => o?.kind === 'diamond').length;

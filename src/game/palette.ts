@@ -28,4 +28,13 @@ export const COLORS = {
   lever: 0x9a7bd0,
   gate: 0x7a6aa0,
   cracks: 0x2a2018,
+  vines: 0x2f7d32,
+  leaf: 0x66bb6a,
+  water: 0x1e5a8a,
+  waterLight: 0x6fb3e0,
+  tool: 0xc0c8d0,
+  snake: 0x7cb342,
+  spider: 0x3a2a3a,
+  monkey: 0x8d5a2b,
+  idol: 0x7d7468,
 } as const;

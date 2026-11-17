@@ -19,7 +19,10 @@ export type Terrain =
   | 'doorGold'
   | 'plate' // pressed while a boulder or the player stands on it
   | 'lever' // bump to toggle
-  | 'gate'; // open while any plate is pressed or the lever is on
+  | 'gate' // open while any plate is pressed or the lever is on
+  | 'vines' // blocks everything; the machete cuts it
+  | 'thorns' // hurts on touch; the machete cuts it
+  | 'water'; // river: blocks the player; a boulder dropped or pushed in makes a bridge
 
 /** Things that occupy a cell and can move or be picked up. */
 export type ObjKind =
@@ -28,7 +31,33 @@ export type ObjKind =
   | 'redDiamond'
   | 'keySilver'
   | 'keyGold'
-  | 'heart';
+  | 'heart'
+  | 'machete'
+  | 'shovel'
+  | 'pickaxe';
+
+export type ToolKind = 'machete' | 'shovel' | 'pickaxe';
+
+export type ActorKind =
+  | 'snake' // patrols left/right, reverses at obstacles
+  | 'spider' // hangs still; drops when the player passes below, then climbs back
+  | 'monkey' // patrols; steals a diamond on contact, drops it when crushed
+  | 'idol'; // Jungle boss: patrols slowly, takes a hit from each falling boulder
+
+export interface Actor {
+  id: number;
+  kind: ActorKind;
+  x: number;
+  y: number;
+  dir: Dir;
+  alive: boolean;
+  /** Ticks until the next move. */
+  wait: number;
+  hp: number;
+  homeY: number;
+  carrying: number;
+  mode: 'idle' | 'drop' | 'climb';
+}
 
 export interface Obj {
   id: number;
@@ -63,7 +92,15 @@ export type GameEventType =
   | 'fill'
   | 'break'
   | 'spiked'
-  | 'fall';
+  | 'fall'
+  | 'cut'
+  | 'splash'
+  | 'tool'
+  | 'enemyKilled'
+  | 'steal'
+  | 'bossHit'
+  | 'bossDefeated'
+  | 'bitten';
 
 /** Events produced by a tick, used by the renderer for sound and effects. */
 export interface GameEvent {
@@ -87,6 +124,8 @@ export interface GameState {
   keys: { silver: number; gold: number };
   gateOpen: boolean;
   leverOn: boolean;
+  tools: Record<ToolKind, boolean>;
+  actors: Actor[];
   tick: number;
   status: GameStatus;
   nextId: number;
@@ -95,4 +134,6 @@ export interface GameState {
 
 export interface Input {
   dir?: Dir | null;
+  /** Use the world tool on the tile the player faces. */
+  action?: boolean;
 }
