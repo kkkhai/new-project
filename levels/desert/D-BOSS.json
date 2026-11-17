@@ -1,0 +1,22 @@
+{
+  "id": "D-BOSS",
+  "name": "Pharaoh's Sand Serpent",
+  "world": "desert",
+  "quota": 0,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel"
+  ],
+  "notes": "Boss: the serpent chases you. Run across a crumbling bridge with it close behind so the floor collapses under it. Three lanes, three falls; each fall sends it back to its lair.",
+  "map": [
+    "############",
+    "#Y   ccc   #",
+    "#  ######  #",
+    "#    ccc   #",
+    "#  ######  #",
+    "#P   ccc  E#",
+    "############"
+  ],
+  "solution": "UUDDDRRRRLUURURUUUUUUUUUUUUUURURRUULLLULLLLUURRRRRRRDDDDR"
+}

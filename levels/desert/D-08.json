@@ -1,0 +1,22 @@
+{
+  "id": "D-08",
+  "name": "Pharaoh's Scale",
+  "world": "desert",
+  "quota": 2,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel"
+  ],
+  "notes": "Insight: drop a sand pile onto the plate to hold the tomb gate open while the darts fly.",
+  "map": [
+    "#############",
+    "#P o      * #",
+    "#### # ######",
+    "#>  =  G   *#",
+    "##########.##",
+    "##########E##",
+    "#############"
+  ],
+  "solution": "RRRRRRRRRLLLLDDRRRRRLDD"
+}

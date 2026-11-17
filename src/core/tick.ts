@@ -1,6 +1,9 @@
 import { DX, DY, type Actor, type Dir, type GameState, type Input, type Obj } from './types.ts';
 import { actorAt, inBounds, makeObj, objAt, playerAt, setObj, setTerrain, terrainAt } from './grid.ts';
-import { ACTOR_SPEED, OBJ_RULES, TOOL_TARGETS, actorCanEnter, fillsWithObject, objectCanEnter, solidForPlayer } from './rules.ts';
+import {
+  ACTOR_SPEED, CRUMBLE_TICKS, DART_PERIOD, OBJ_RULES, SINK_TICKS, TOOL_TARGETS,
+  actorCanEnter, dartPasses, fillsWithObject, objectCanEnter, solidForPlayer,
+} from './rules.ts';
 
 /**
  * Advance the game by one tick. Order (see docs/GDD.md, Technical architecture):
@@ -15,10 +18,15 @@ export function step(s: GameState, input: Input = {}): void {
   else if (input.dir) movePlayer(s, input.dir);
   if (s.status === 'playing') physics(s);
   if (s.status === 'playing') updateActors(s);
+  if (s.status === 'playing') updateTimers(s);
+  if (s.status === 'playing') fireDarts(s);
+  if (s.status === 'playing') updateQuicksand(s);
   if (s.status === 'playing') updateGates(s);
 }
 
-export const bossAlive = (s: GameState): boolean => s.actors.some((a) => a.alive && a.kind === 'idol');
+const isBoss = (a: Actor): boolean => a.kind === 'idol' || a.kind === 'serpent';
+
+export const bossAlive = (s: GameState): boolean => s.actors.some((a) => a.alive && isBoss(a));
 
 export const exitOpen = (s: GameState): boolean => s.diamonds >= s.quota && !bossAlive(s);
 
@@ -43,7 +51,7 @@ export function freeForActor(s: GameState, x: number, y: number): boolean {
   );
 }
 
-function kill(s: GameState, type: 'crush' | 'spiked' | 'fall' | 'bitten', x: number, y: number): void {
+function kill(s: GameState, type: 'crush' | 'spiked' | 'fall' | 'bitten' | 'sink' | 'dart', x: number, y: number): void {
   s.player.alive = false;
   s.status = 'dead';
   s.events.push({ type, x, y });
@@ -112,6 +120,10 @@ function movePlayer(s: GameState, dir: Dir): void {
   if (t === 'dirt') {
     setTerrain(s, nx, ny, 'floor');
     s.events.push({ type: 'dig', x: nx, y: ny });
+  }
+  if (terrainAt(s, p.x, p.y) === 'crumble') {
+    setTerrain(s, p.x, p.y, 'crumbling');
+    s.timers[p.y * s.width + p.x] = CRUMBLE_TICKS;
   }
   p.x = nx;
   p.y = ny;
@@ -219,7 +231,7 @@ function updateGravityObject(s: GameState, x: number, y: number, moved: Set<numb
   const enemy = actorAt(s, x, y + 1);
   if (enemy) {
     if (wasFalling && rule.crushes) {
-      if (enemy.kind === 'idol') {
+      if (isBoss(enemy)) {
         setObj(s, x, y, null);
         hitBoss(s, enemy);
       } else {
@@ -283,21 +295,123 @@ function updateActors(s: GameState): void {
     }
     a.wait = ACTOR_SPEED[a.kind] - 1;
     if (a.kind === 'spider') moveSpider(s, a);
-    else patrol(s, a);
+    else if (a.kind === 'mummy' || a.kind === 'serpent') chase(s, a);
+    else if (a.kind === 'scarab') {
+      if (Math.abs(s.player.x - a.x) + Math.abs(s.player.y - a.y) <= 5) chase(s, a);
+    } else patrol(s, a);
     if (s.status !== 'playing') return;
   }
 }
 
-/** Walk left/right; turn around at anything in the way. Touching the player bites (monkeys steal). */
+const OPPOSITE: Readonly<Record<Dir, Dir>> = { up: 'down', down: 'up', left: 'right', right: 'left' };
+
+/** Walk back and forth along a line; turn around at anything in the way. Touching the player bites (monkeys steal). */
 function patrol(s: GameState, a: Actor): void {
   const nx = a.x + DX[a.dir];
-  if (playerAt(s, nx, a.y)) {
+  const ny = a.y + DY[a.dir];
+  if (playerAt(s, nx, ny)) {
     if (a.kind === 'monkey') steal(s, a);
-    else kill(s, 'bitten', nx, a.y);
+    else kill(s, 'bitten', nx, ny);
     return;
   }
-  if (freeForActor(s, nx, a.y)) a.x = nx;
-  else a.dir = a.dir === 'left' ? 'right' : 'left';
+  if (freeForActor(s, nx, ny)) {
+    a.x = nx;
+    a.y = ny;
+  } else a.dir = OPPOSITE[a.dir];
+}
+
+/** Step toward the player along the longer axis first; try the other axis if blocked. */
+function chase(s: GameState, a: Actor): void {
+  const dx = Math.sign(s.player.x - a.x);
+  const dy = Math.sign(s.player.y - a.y);
+  const horizontal: Dir | null = dx > 0 ? 'right' : dx < 0 ? 'left' : null;
+  const vertical: Dir | null = dy > 0 ? 'down' : dy < 0 ? 'up' : null;
+  const first = Math.abs(s.player.x - a.x) >= Math.abs(s.player.y - a.y) ? [horizontal, vertical] : [vertical, horizontal];
+  for (const d of first) {
+    if (!d) continue;
+    const nx = a.x + DX[d];
+    const ny = a.y + DY[d];
+    if (playerAt(s, nx, ny)) {
+      kill(s, 'bitten', nx, ny);
+      return;
+    }
+    if (freeForActor(s, nx, ny)) {
+      a.x = nx;
+      a.y = ny;
+      a.dir = d;
+      return;
+    }
+  }
+}
+
+/** Collapsing floors count down and become pits; whatever stands there falls in. */
+function updateTimers(s: GameState): void {
+  for (const key of Object.keys(s.timers)) {
+    const i = Number(key);
+    if (--s.timers[i] > 0) continue;
+    delete s.timers[i];
+    const x = i % s.width;
+    const y = (i - x) / s.width;
+    s.events.push({ type: 'collapse', x, y });
+    const o = objAt(s, x, y);
+    if (o) {
+      setObj(s, x, y, null);
+      setTerrain(s, x, y, 'floor');
+      s.events.push({ type: 'fill', x, y, kind: o.kind });
+      continue;
+    }
+    setTerrain(s, x, y, 'pit');
+    const a = actorAt(s, x, y);
+    if (a) {
+      if (isBoss(a)) {
+        hitBoss(s, a);
+        if (a.alive) {
+          a.x = a.homeX;
+          a.y = a.homeY;
+          a.wait = 4;
+        }
+      } else killActor(s, a);
+    }
+    if (playerAt(s, x, y)) kill(s, 'fall', x, y);
+    if (s.status !== 'playing') return;
+  }
+}
+
+/** Every DART_PERIOD ticks each dart trap shoots along its row until something stops the dart. */
+function fireDarts(s: GameState): void {
+  if (s.tick % DART_PERIOD !== 0) return;
+  for (let i = 0; i < s.terrain.length; i++) {
+    const t = s.terrain[i];
+    if (t !== 'dartRight' && t !== 'dartLeft') continue;
+    const step = t === 'dartRight' ? 1 : -1;
+    const y = Math.floor(i / s.width);
+    let x = i % s.width;
+    const fromX = x;
+    for (;;) {
+      x += step;
+      if (!inBounds(s, x, y) || !dartPasses(terrainAt(s, x, y), s.gateOpen) || objAt(s, x, y)) break;
+      if (playerAt(s, x, y)) {
+        s.events.push({ type: 'dart', x: fromX, y, toX: x });
+        kill(s, 'dart', x, y);
+        return;
+      }
+      const a = actorAt(s, x, y);
+      if (a) {
+        if (!isBoss(a)) killActor(s, a);
+        break;
+      }
+    }
+    s.events.push({ type: 'dart', x: fromX, y, toX: x - step });
+  }
+}
+
+function updateQuicksand(s: GameState): void {
+  const p = s.player;
+  if (terrainAt(s, p.x, p.y) !== 'quicksand') {
+    s.sinking = 0;
+    return;
+  }
+  if (++s.sinking >= SINK_TICKS) kill(s, 'sink', p.x, p.y);
 }
 
 /** Hang until the player is directly below with a clear drop, fall to the floor, then climb home. */

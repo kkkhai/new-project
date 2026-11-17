@@ -33,6 +33,7 @@ export const cloneState = (s: GameState): GameState => ({
   keys: { ...s.keys },
   tools: { ...s.tools },
   actors: s.actors.map((a) => ({ ...a })),
+  timers: { ...s.timers },
   events: s.events.slice(),
 });
 

@@ -29,6 +29,8 @@ Allowed licences: CC0, Pixabay License, Sonniss GDC bundle. Add every file to `C
 | `exit` | exit gate opens | Kenney Interface Sounds |
 | `win` | level complete | Kenney Interface Sounds |
 | `click` | menu button | Kenney Interface Sounds |
+| `dart` | a dart trap fires | Pixabay |
+| `collapse` | crumbling floor gives way | Pixabay |
 
 ## Music: `music/<name>.ogg` (or `.mp3`), loops while playing
 

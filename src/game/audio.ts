@@ -43,6 +43,8 @@ const SYNTH: Record<string, Synth[]> = {
   exit: [{ freq: 523, dur: 0.1, type: 'square', vol: 0.06 }, { freq: 659, dur: 0.1, type: 'square', vol: 0.06 }, { freq: 784, dur: 0.15, type: 'square', vol: 0.06 }],
   win: [{ freq: 523, dur: 0.12, type: 'square', vol: 0.07 }, { freq: 784, dur: 0.12, type: 'square', vol: 0.07 }, { freq: 1047, dur: 0.25, type: 'square', vol: 0.07 }],
   click: [{ freq: 900, dur: 0.03, type: 'square', vol: 0.04 }],
+  dart: [{ freq: 2000, to: 600, dur: 0.12, type: 'sawtooth', vol: 0.04 }],
+  collapse: [{ freq: 0, dur: 0.3, noise: true, vol: 0.07 }],
 };
 
 /** Which sound each game event plays. */
@@ -50,7 +52,7 @@ const EVENT_SOUND: Partial<Record<GameEvent['type'], string>> = {
   dig: 'dig', push: 'push', land: 'land', crush: 'crush', spiked: 'hurt', fall: 'hurt', bitten: 'hurt',
   checkpoint: 'checkpoint', unlock: 'door', gateOpen: 'gate', gateClose: 'gate', cut: 'cut', splash: 'splash',
   fill: 'land', break: 'land', enemyKilled: 'enemy', steal: 'steal', bossHit: 'boss', bossDefeated: 'boss',
-  exitOpen: 'exit', win: 'win', tool: 'item', lever: 'gate',
+  exitOpen: 'exit', win: 'win', tool: 'item', lever: 'gate', sink: 'hurt', dart: 'dart', collapse: 'collapse',
 };
 
 export class Audio {

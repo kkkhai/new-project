@@ -67,6 +67,16 @@ File name = level id, e.g. `jungle/J-05.json`.
 | `W` | Spider (hangs; drops when you pass below) |
 | `M` | Monkey (steals a diamond on contact) |
 | `B` | Stone Idol Guardian (Jungle boss, 3 hits) |
+| `c` | Crumbling floor (collapses into a pit ~1 s after you leave it) |
+| `q` | Quicksand (3 ticks in it and you sink; shovel or a pushed object fills it) |
+| `%` | Packed sand (blocks; dig with the shovel) |
+| `o` | Sand pile (falls like a boulder, never crushes, pushable) |
+| `u` | Shovel pickup |
+| `>` / `<` | Dart trap firing right / left along its row every 8 ticks |
+| `Z` / `z` | Scorpion, patrols down / up |
+| `A` | Scarab (chases when you're within 5 tiles) |
+| `U` | Mummy (slowly chases you) |
+| `Y` | Pharaoh's Sand Serpent (Desert boss: falls when crumbling floor collapses under it) |
 
 More characters are added as new tiles arrive; `src/core/level.ts` (`LEGEND`) is the source of truth.
 

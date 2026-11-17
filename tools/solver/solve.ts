@@ -8,7 +8,7 @@ import { parseLevel, type LevelDef } from '../../src/core/level.ts';
 import { step } from '../../src/core/tick.ts';
 import { cloneState, terrainAt } from '../../src/core/grid.ts';
 import { encodeInput } from '../../src/core/replay.ts';
-import { TOOL_TARGETS } from '../../src/core/rules.ts';
+import { DART_PERIOD, TOOL_TARGETS } from '../../src/core/rules.ts';
 import { DX, DY, type GameState, type Input } from '../../src/core/types.ts';
 
 const MOVES: Input[] = [{ dir: 'up' }, { dir: 'down' }, { dir: 'left' }, { dir: 'right' }, {}];
@@ -23,7 +23,9 @@ function inputsFor(s: GameState): Input[] {
 /** Everything that affects the future of the game, excluding counters like tick and ids. */
 export function stateKey(s: GameState): string {
   const parts: string[] = [`${s.player.x},${s.player.y},${s.diamonds}`];
-  parts.push(s.terrain.map((t) => t[0] + t[1]).join(''));
+  // Dart traps fire on a global clock, so the clock phase matters when the level has any.
+  if (s.terrain.some((t) => t === 'dartLeft' || t === 'dartRight')) parts.push(`t${s.tick % DART_PERIOD}`);
+  parts.push(s.terrain.join(','));
   parts.push(s.player.facing);
   parts.push(s.objs.map((o) => (o ? o.kind.slice(0, 3) + (o.falling ? 'f' : '') : '-')).join(''));
   parts.push(s.actors.map((a) => `${a.alive ? 1 : 0}${a.x},${a.y},${a.dir[0]},${a.wait},${a.hp},${a.carrying},${a.mode[0]}`).join(';'));

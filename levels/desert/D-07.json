@@ -1,0 +1,21 @@
+{
+  "id": "D-07",
+  "name": "Dart Gallery",
+  "world": "desert",
+  "quota": 2,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel"
+  ],
+  "notes": "Insight: the sand pile shields the top row; the bottom diamond shields you until you take it. Then you have 8 ticks before the next dart.",
+  "map": [
+    "##############",
+    "#>   o  *    #",
+    "#######.######",
+    "#P        *< #",
+    "#E############",
+    "##############"
+  ],
+  "solution": "UUUUURRRRRRUURLDDRRRLLLUDLLLLLLD"
+}

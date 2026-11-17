@@ -1,0 +1,22 @@
+{
+  "id": "D-10",
+  "name": "Sunken Tomb",
+  "world": "desert",
+  "quota": 3,
+  "parTimeSec": 30,
+  "tools": [
+    "machete",
+    "shovel"
+  ],
+  "notes": "Exam: packed sand, quicksand, crumbling floor, darts and a mummy.",
+  "map": [
+    "################",
+    "#P %  qq  * cc #",
+    "#### ######### #",
+    "#>    o      * #",
+    "#### #####.#####",
+    "#U  *ccc   .  E#",
+    "################"
+  ],
+  "solution": "RXRRDDDDUUUURRRRRRRRRRDDLLLLDDRRRR"
+}
