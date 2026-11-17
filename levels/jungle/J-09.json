@@ -10,12 +10,13 @@
   "notes": "Insight: one push starts a chain: the boulder smashes two cracked floors and lands on the plate that opens the gate.",
   "map": [
     "############",
-    "#P O  ..*  #",
+    "#P O  ..*r #",
     "#### ###.###",
     "####x###G###",
     "####x###.*.#",
     "####=###*E #",
     "############"
   ],
-  "solution": "RRRRRRRDDDDURD"
+  "solution": "RRRRRRRDDDDURD",
+  "secretSolution": "RRRRRRRRLDDDDURD"
 }

@@ -12,9 +12,10 @@
     "##############",
     "#P *k#*  O  K#",
     "#  ..d   .  ##",
-    "######M  *  D#",
+    "######M  *r D#",
     "############E#",
     "##############"
   ],
-  "solution": "RRRDRRDURDRRURURRLDDRD"
+  "solution": "RRRDRRDURDRRURURRLDDRD",
+  "secretSolution": "RRRDRRDURDRRURURRLDDLRRD"
 }

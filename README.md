@@ -7,7 +7,7 @@ All names, art and levels are original; only the genre and mechanics are borrowe
 - **Platforms:** web, iOS and Android
 - **Scope (draft):** 3 worlds × 10 levels + 1 boss each = 33 stages
 - **Engine:** Phaser 3 + TypeScript (Vite); iOS/Android via Capacitor later
-- **Status:** M4: all three worlds playable (33 stages)
+- **Status:** M5: feature-complete test version (33 campaign stages + secret level), awaiting real art, audio and playtesting
 
 ## Documents
 
@@ -15,7 +15,9 @@ All names, art and levels are original; only the genre and mechanics are borrowe
 | --- | --- |
 | [`docs/GDD.md`](docs/GDD.md) | Game design document: mechanics, worlds, levels, art/audio, architecture, roadmap |
 | [`CREDITS.md`](CREDITS.md) | Every third-party asset used, with source and licence |
-| [`levels/README.md`](levels/README.md) | Level file format and naming |
+| [`levels/README.md`](levels/README.md) | Level file format, map legend and tools |
+| [`docs/MOBILE.md`](docs/MOBILE.md) | Building the iOS and Android apps with Capacitor |
+| [`assets/audio/README.md`](assets/audio/README.md) | Sound file names to drop in |
 
 ## Run it
 
@@ -31,7 +33,12 @@ npm run build          # production build in dist/
 
 Controls: arrows / WASD to move, Space (or X) uses the world tool, R restart room (back to last checkpoint, no heart lost), Esc pause menu, M mute. On phones: on-screen D-pad and TOOL button, or swipe.
 
-Progress (unlocked levels, stars, best scores) is saved in the browser.
+Progress (unlocked levels, stars, best scores, settings) is saved in the browser.
+
+- **Difficulty** (Settings): Easy (5 hearts, Z / Undo button), Normal (3 hearts), Hard (1 heart, no checkpoints in boss stages).
+- **Language** (Settings): English or Tiếng Việt.
+- **Red diamonds** unlock rewards: concept art gallery, Time Trial timer, golden costume, and the secret level.
+- **iOS / Android**: see [`docs/MOBILE.md`](docs/MOBILE.md).
 
 ## Repository layout
 

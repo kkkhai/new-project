@@ -14,8 +14,9 @@
     "############",
     "#P Q  Q    #",
     "####w##w####",
-    "#*   #    E#",
+    "#*   #r   E#",
     "############"
   ],
-  "solution": "RRRDDLLLRRRUURRRDDRRR"
+  "solution": "RRRDDLLLRRRUURRRDDRRR",
+  "secretSolution": "RRRDDLLLRRRUURRRDDLRRRR"
 }

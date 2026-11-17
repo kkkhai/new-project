@@ -16,8 +16,9 @@
     "#####j######  #",
     "#*  jj    V  *#",
     "#### #######_##",
-    "#E          * #",
+    "#E          *r#",
     "###############"
   ],
-  "solution": "RRXRRDDLLLLRRRDDRRRRRRRRUURLDDLLLLLLLLLLL"
+  "solution": "RRXRRDDLLLLRRRDDRRRRRRRRUURLDDLLLLLLLLLLL",
+  "secretSolution": "RRXRRDDLLLLRRRDDRRRRRRRRUURLDDRLLLLLLLLLLLL"
 }

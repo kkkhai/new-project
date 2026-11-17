@@ -202,7 +202,7 @@ Levels unlock in a straight line inside each world, and a world unlocks when the
 
 - Next level unlocks on finishing the current one.
 - Next world unlocks on beating the boss. Finished levels can be replayed any time.
-- Red diamonds unlock rewards: 10 → concept art gallery, 30 → Time Trial mode, 60 → explorer costume, all 99 → secret final level and true ending.
+- Red diamonds unlock rewards at ¼, ½, ¾ and all of the red diamonds placed: concept art gallery, Time Trial mode, explorer costume, secret final level. (Thresholds scale with the number placed; the original plan was 10/30/60/99 for 3 per level.)
 
 **Score and star rating per level**
 
@@ -344,8 +344,8 @@ Build the rules first, then one world end to end, then copy the pipeline to the 
 **Decisions awaiting the owner's approval** (everything above is a draft until these are confirmed)
 
 - [x] Engine: Phaser + TypeScript, wrapped with Capacitor for iOS/Android (decided 18 Nov 2026). Platforms: web + iOS + Android
-- [ ] Scope: 3 worlds × 10 levels + boss (33 stages) assumed for now, or a smaller first release
-- [ ] Combat: puzzle-only (enemies die only by boulders/hazards) or add a direct attack
-- [ ] Art style: 32×32 pixel art, or another style
-- [ ] Lives model: 3 hearts + checkpoints, or unlimited retries
+- [x] Scope: 3 worlds × 10 levels + boss (33 stages) built as the test version
+- [x] Combat: puzzle-only (built that way; owner can still change it)
+- [ ] Art style: 32×32 pixel art (owner supplies the art)
+- [x] Lives model: 3 hearts + checkpoints on Normal; Easy 5 + undo; Hard 1
 - [ ] Working title and final game name

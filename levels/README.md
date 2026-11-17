@@ -6,6 +6,7 @@ One JSON file per level. The map is drawn as text, one string per row, so levels
 - `jungle/` — J-01 … J-10, J-BOSS
 - `desert/` — D-01 … D-10, D-BOSS
 - `snow/` — S-01 … S-10, S-BOSS
+- `secret/` — X-01, unlocked by collecting every red diamond
 
 File name = level id, e.g. `jungle/J-05.json`.
 
@@ -36,6 +37,7 @@ File name = level id, e.g. `jungle/J-05.json`.
 | `parTimeSec` | Par time for 2 stars |
 | `tools` | Tools already owned at the start (earned in earlier levels), e.g. `["machete"]` |
 | `solution` | Moves that win the level: `U D L R`, `X` = use tool, `.` = wait one tick. CI replays it on every pull request. |
+| `secretSolution` | Required when the map has red diamonds: a route that wins *and* collects them all. CI checks it. |
 
 ## Map legend
 
@@ -106,3 +108,5 @@ node tools/solver/route.ts levels/jungle/J-01.json "4,1 1,3 4,3 7,3 !R X 12,3 12
 ```
 
 Waypoints: `x,y` walk there · `X` use the tool · `!MOVES` literal moves.
+
+`node tools/place-red-diamonds.ts levels/<world>/*.json` places one red diamond per level in a pocket beside the solution's route and writes its `secretSolution`. Hand-placed red diamonds are better; this tool gives a first pass.

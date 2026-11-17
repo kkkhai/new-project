@@ -104,12 +104,11 @@ test('session: dying costs a heart and returns to the last checkpoint', () => {
 });
 
 test('session: losing the last heart restarts the level with full hearts', () => {
-  const sess = new Session(lvl(['#######', '#PC^  #', '#######']), 2);
-  play(sess, 'RR');
+  const sess = new Session(lvl(['#######', '#PC^  #', '#######']), 'hard');
   assert.equal(sess.state.hearts, 1);
-  const r = play(sess, 'R');
-  assert.equal(r[0], 'gameOver');
-  assert.equal(sess.state.hearts, 2);
+  const r = play(sess, 'RR');
+  assert.equal(r[1], 'gameOver');
+  assert.equal(sess.state.hearts, 1);
   assert.equal(sess.state.player.x, 1);
 });
 
@@ -121,4 +120,31 @@ test('session: restart room keeps hearts and restores the checkpoint', () => {
   assert.equal(terrainAt(sess.state, 4, 1), 'dirt', 'dirt dug after the checkpoint comes back');
   assert.equal(terrainAt(sess.state, 2, 1), 'floor', 'dirt dug before the checkpoint stays dug');
   assert.equal(sess.state.hearts, 3);
+});
+
+test('easy mode has 5 hearts and undo', () => {
+  const sess = new Session(lvl(['#######', '#P.*  #', '#######'], 1), 'easy');
+  assert.equal(sess.state.hearts, 5);
+  play(sess, 'RR');
+  assert.equal(sess.state.diamonds, 1);
+  assert.ok(sess.undo());
+  assert.equal(sess.state.diamonds, 0);
+  assert.equal(sess.state.player.x, 2);
+  assert.ok(sess.undo());
+  assert.equal(sess.state.player.x, 1);
+  assert.equal(sess.undo(), false);
+});
+
+test('normal mode has no undo', () => {
+  const sess = new Session(lvl(['#####', '#P  #', '#####']));
+  play(sess, 'R');
+  assert.equal(sess.canUndo, false);
+});
+
+test('hard mode ignores checkpoints in boss stages', () => {
+  const boss = { ...lvl(['#######', '#PC^  #', '#######']), id: 'X-BOSS' };
+  const sess = new Session(boss, 'hard');
+  play(sess, 'R');
+  play(sess, 'R');
+  assert.equal(sess.state.player.x, 1, 'back to the start, not the checkpoint');
 });

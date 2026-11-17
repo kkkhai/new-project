@@ -64,6 +64,31 @@ try {
   await page.waitForTimeout(200);
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
+  // Every menu scene and one level per world renders without errors.
+  for (const [scene, data] of [
+    ['WorldMap', {}], ['Training', {}], ['Settings', {}], ['Rewards', {}],
+    ['Game', { levelId: 'D-BOSS' }], ['Game', { levelId: 'S-10' }], ['Game', { levelId: 'X-01' }],
+  ] as const) {
+    await page.evaluate(([k, d]) => {
+      const g = window.__game!;
+      for (const sc of g.scene.getScenes(true)) g.scene.stop(sc.scene.key);
+      g.scene.start(k, d);
+    }, [scene, data] as const);
+    await page.waitForTimeout(400);
+    console.log(`ok   scene ${scene}${'levelId' in data ? ` ${data.levelId}` : ''}`);
+  }
+  // Switch to Vietnamese via the settings save and reload the map.
+  await page.evaluate(() => {
+    const key = 'diamond-rush-recreate/save/slot1';
+    const save = JSON.parse(localStorage.getItem(key) ?? '{}');
+    save.settings = { ...(save.settings ?? {}), language: 'vi' };
+    localStorage.setItem(key, JSON.stringify(save));
+    const g = window.__game!;
+    for (const sc of g.scene.getScenes(true)) g.scene.stop(sc.scene.key);
+    g.scene.start('WorldMap');
+  });
+  await page.waitForTimeout(400);
+  console.log('ok   Vietnamese world map');
 } catch (e) {
   fail(String(e));
 }

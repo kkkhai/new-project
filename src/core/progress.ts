@@ -1,4 +1,5 @@
 import type { LevelDef } from './level.ts';
+import type { Difficulty } from './session.ts';
 
 /** Seconds per game tick (GDD: a step takes 150 ms). */
 export const TICK_SECONDS = 0.15;
@@ -38,14 +39,27 @@ export interface SaveData {
   /** Ids of levels the player may start. */
   unlocked: string[];
   records: Record<string, LevelRecord>;
-  settings: { muted: boolean };
+  settings: Settings;
 }
+
+export type Language = 'en' | 'vi';
+
+export interface Settings {
+  muted: boolean;
+  difficulty: Difficulty;
+  language: Language;
+  /** Reward toggles (only usable once unlocked). */
+  timeTrial: boolean;
+  costume: boolean;
+}
+
+export const DEFAULT_SETTINGS: Settings = { muted: false, difficulty: 'normal', language: 'en', timeTrial: false, costume: false };
 
 export const newSave = (firstLevelId: string): SaveData => ({
   version: 1,
   unlocked: [firstLevelId],
   records: {},
-  settings: { muted: false },
+  settings: { ...DEFAULT_SETTINGS },
 });
 
 /** Record a finished level: keep the best of each stat and unlock the next level in order. */
@@ -64,3 +78,19 @@ export function recordResult(save: SaveData, def: LevelDef, r: LevelResult, orde
 
 export const totalRedDiamonds = (save: SaveData): number =>
   Object.values(save.records).reduce((n, r) => n + r.redDiamonds, 0);
+
+/** Red-diamond rewards (GDD), as fractions of all red diamonds in the game so they scale with the levels. */
+export const REWARDS = [
+  { id: 'gallery', share: 0.25 },
+  { id: 'timeTrial', share: 0.5 },
+  { id: 'costume', share: 0.75 },
+  { id: 'secretLevel', share: 1 },
+] as const;
+
+export type RewardId = (typeof REWARDS)[number]['id'];
+
+export const rewardThreshold = (id: RewardId, totalAvailable: number): number =>
+  Math.max(1, Math.ceil(REWARDS.find((r) => r.id === id)!.share * totalAvailable));
+
+export const rewardUnlocked = (save: SaveData, id: RewardId, totalAvailable: number): boolean =>
+  totalAvailable > 0 && totalRedDiamonds(save) >= rewardThreshold(id, totalAvailable);

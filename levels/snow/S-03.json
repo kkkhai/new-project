@@ -14,8 +14,9 @@
     "##########",
     "#P jjjj *#",
     "#  j  j  #",
-    "#* jjjj E#",
+    "#*rjjjj E#",
     "##########"
   ],
-  "solution": "DDURRRRRRRD"
+  "solution": "DDURRRRRRRD",
+  "secretSolution": "DDURDURRRRRRD"
 }

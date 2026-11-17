@@ -12,8 +12,9 @@
     "#############",
     "#P u %* qqq*#",
     "#####%#######",
-    "#E  *       #",
+    "#E  * r     #",
     "#############"
   ],
-  "solution": "RRRXRDXRRRXRRRLLLLLLDDLLLL"
+  "solution": "RRRXRDXRRRXRRRLLLLLLDDLLLL",
+  "secretSolution": "RRRXRDXRRRXRRRLLLLLLDDRLLLLL"
 }

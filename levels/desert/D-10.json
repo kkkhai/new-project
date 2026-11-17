@@ -15,8 +15,9 @@
     "#### ######### #",
     "#>    o      * #",
     "#### #####.#####",
-    "#U  *ccc   .  E#",
+    "#U  *ccc r .  E#",
     "################"
   ],
-  "solution": "RXRRDDDDUUUURRRRRRRRRRDDLLLLDDRRRR"
+  "solution": "RXRRDDDDUUUURRRRRRRRRRDDLLLLDDRRRR",
+  "secretSolution": "RXRRDDDDUUUURRRRRRRRRRDDLLLLDDLRRRRR"
 }

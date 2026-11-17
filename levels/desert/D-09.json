@@ -13,8 +13,9 @@
     "###############",
     "#P    cc    A*#",
     "#     cc      #",
-    "#*          E #",
+    "#*     r    E #",
     "###############"
   ],
-  "solution": "UDDURRRRRRRRRRRRDL"
+  "solution": "UDDURRRRRRRRRRRRDL",
+  "secretSolution": "UDDURRRRRRDURRRRRRDL"
 }

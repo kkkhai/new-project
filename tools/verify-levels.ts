@@ -4,7 +4,7 @@
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { countDiamonds, parseLevel, type LevelDef } from '../src/core/level.ts';
+import { countDiamonds, countRedDiamonds, parseLevel, type LevelDef } from '../src/core/level.ts';
 import { replay } from '../src/core/replay.ts';
 
 function levelFiles(dir: string): string[] {
@@ -26,7 +26,17 @@ for (const file of files) {
     if (!def.solution) throw new Error('no "solution" stored (run tools/solver/solve.ts --write)');
     const end = replay(def, def.solution);
     if (end.status !== 'won') throw new Error(`stored solution ends with status "${end.status}"`);
-    console.log(`ok   ${def.id.padEnd(8)} ${def.name} (${def.solution.length} moves)`);
+    const reds = countRedDiamonds(start);
+    let secret = '';
+    if (def.secretSolution) {
+      const all = replay(def, def.secretSolution);
+      if (all.status !== 'won') throw new Error(`secretSolution ends with status "${all.status}"`);
+      if (all.redDiamonds !== reds) throw new Error(`secretSolution collects ${all.redDiamonds}/${reds} red diamonds`);
+      secret = `, all ${reds} red in ${def.secretSolution.length}`;
+    } else if (reds > 0) {
+      throw new Error(`${reds} red diamond(s) but no "secretSolution" proving they can be collected`);
+    }
+    console.log(`ok   ${def.id.padEnd(8)} ${def.name} (${def.solution.length} moves${secret})`);
   } catch (e) {
     failed++;
     console.error(`FAIL ${file}: ${(e as Error).message}`);

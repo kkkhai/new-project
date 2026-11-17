@@ -17,6 +17,8 @@ export interface LevelDef {
   map: string[];
   /** Moves that finish the level: U D L R, and "." to wait one tick. Checked in CI. */
   solution?: string;
+  /** A route that also collects every red diamond. Checked in CI. */
+  secretSolution?: string;
   notes?: string;
 }
 
