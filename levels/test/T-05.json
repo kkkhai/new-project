@@ -1,0 +1,15 @@
+{
+  "id": "T-05",
+  "name": "Mind the Gap",
+  "world": "test",
+  "quota": 1,
+  "notes": "Insight: fill the pit with the boulder to cross. Red diamond sits between spikes; a heart waits in the corner.",
+  "map": [
+    "###########",
+    "#PO_ ^ *  #",
+    "#.## . ##.#",
+    "#h  ^r^  E#",
+    "###########"
+  ],
+  "solution": "RRRDRRURRRDD"
+}

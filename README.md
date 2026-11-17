@@ -7,7 +7,7 @@ All names, art and levels are original; only the genre and mechanics are borrowe
 - **Platforms:** web, iOS and Android
 - **Scope (draft):** 3 worlds × 10 levels + 1 boss each = 33 stages
 - **Engine:** Phaser 3 + TypeScript (Vite); iOS/Android via Capacitor later
-- **Status:** M0 prototype
+- **Status:** M1 core systems
 
 ## Documents
 
@@ -29,7 +29,7 @@ npm run verify-levels  # replay every level's stored solution
 npm run build          # production build in dist/
 ```
 
-Controls: arrows / WASD to move (swipe on touch screens), R restart, N next level.
+Controls: arrows / WASD to move (swipe on touch screens), R restart room (back to last checkpoint, no heart lost), L restart level, N next level.
 
 ## Repository layout
 

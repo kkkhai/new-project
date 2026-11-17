@@ -17,10 +17,15 @@ export interface ObjRule {
 export const OBJ_RULES: Readonly<Record<ObjKind, ObjRule>> = {
   boulder: { gravity: true, round: true, crushes: true, pushable: true, collectible: false },
   diamond: { gravity: true, round: true, crushes: false, pushable: false, collectible: true },
+  redDiamond: { gravity: true, round: true, crushes: false, pushable: false, collectible: true },
+  keySilver: { gravity: false, round: false, crushes: false, pushable: false, collectible: true },
+  keyGold: { gravity: false, round: false, crushes: false, pushable: false, collectible: true },
+  heart: { gravity: false, round: false, crushes: false, pushable: false, collectible: true },
 };
 
 /** Terrain an object may move into (it must also be free of other objects and the player). */
-export const objectCanEnter = (t: Terrain): boolean => t === 'floor';
+export const objectCanEnter = (t: Terrain, gateOpen: boolean): boolean =>
+  t === 'floor' || t === 'plate' || t === 'spikes' || t === 'pit' || (t === 'gate' && gateOpen);
 
-/** Terrain the player may walk onto (doors, exits etc. are handled separately in tick.ts). */
-export const playerCanEnter = (t: Terrain): boolean => t === 'floor' || t === 'dirt';
+/** Terrain the player can never walk into. */
+export const solidForPlayer = (t: Terrain): boolean => t === 'wall' || t === 'cracked' || t === 'lever';

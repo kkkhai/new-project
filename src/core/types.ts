@@ -10,12 +10,25 @@ export type Terrain =
   | 'floor'
   | 'wall'
   | 'dirt'
-  | 'exit';
+  | 'exit'
+  | 'cracked' // wall that breaks when a falling boulder lands on it
+  | 'spikes' // kills the player; objects may rest on it
+  | 'pit' // kills the player; an object that enters fills it and becomes floor
+  | 'checkpoint' // saves progress when the player steps on it
+  | 'doorSilver'
+  | 'doorGold'
+  | 'plate' // pressed while a boulder or the player stands on it
+  | 'lever' // bump to toggle
+  | 'gate'; // open while any plate is pressed or the lever is on
 
 /** Things that occupy a cell and can move or be picked up. */
 export type ObjKind =
   | 'boulder'
-  | 'diamond';
+  | 'diamond'
+  | 'redDiamond'
+  | 'keySilver'
+  | 'keyGold'
+  | 'heart';
 
 export interface Obj {
   id: number;
@@ -41,7 +54,16 @@ export type GameEventType =
   | 'land'
   | 'crush'
   | 'exitOpen'
-  | 'win';
+  | 'win'
+  | 'checkpoint'
+  | 'unlock'
+  | 'lever'
+  | 'gateOpen'
+  | 'gateClose'
+  | 'fill'
+  | 'break'
+  | 'spiked'
+  | 'fall';
 
 /** Events produced by a tick, used by the renderer for sound and effects. */
 export interface GameEvent {
@@ -59,6 +81,12 @@ export interface GameState {
   player: Player;
   diamonds: number;
   quota: number;
+  redDiamonds: number;
+  hearts: number;
+  maxHearts: number;
+  keys: { silver: number; gold: number };
+  gateOpen: boolean;
+  leverOn: boolean;
   tick: number;
   status: GameStatus;
   nextId: number;

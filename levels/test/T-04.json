@@ -1,0 +1,15 @@
+{
+  "id": "T-04",
+  "name": "The Weight of Stone",
+  "world": "test",
+  "quota": 2,
+  "notes": "Insight: a boulder left on the plate holds the gate open for you. Key opens the silver door.",
+  "map": [
+    "###########",
+    "#P O=######",
+    "# #########",
+    "# C G*kd*E#",
+    "###########"
+  ],
+  "solution": "RRLLDDRRRRRRRR"
+}
