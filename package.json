@@ -1,0 +1,27 @@
+{
+  "name": "diamond-rush-recreate",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"tests/**/*.test.ts\"",
+    "verify-levels": "node tools/verify-levels.ts",
+    "smoke": "node tools/smoke.ts"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "playwright": "^1.49.0",
+    "typescript": "^5.9.0",
+    "vite": "^6.3.0"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}

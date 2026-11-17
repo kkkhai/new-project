@@ -1,0 +1,15 @@
+{
+  "id": "T-03",
+  "name": "Heavy Lifting",
+  "world": "test",
+  "quota": 2,
+  "notes": "Insight: push the boulder aside to open the dirt passage up to the top row. The third diamond is a red herring: pushing the boulder walls it off.",
+  "map": [
+    "##########",
+    "#P O*   E#",
+    "#  ###.###",
+    "#O *  O *#",
+    "##########"
+  ],
+  "solution": "DRDRRRRUULLRRRR"
+}

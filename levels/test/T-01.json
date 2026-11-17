@@ -1,0 +1,15 @@
+{
+  "id": "T-01",
+  "name": "First Steps",
+  "world": "test",
+  "quota": 3,
+  "notes": "Insight: dig through dirt to reach diamonds; the exit opens at the quota.",
+  "map": [
+    "##########",
+    "#P..*...E#",
+    "#.####.#.#",
+    "#*.....*.#",
+    "##########"
+  ],
+  "solution": "DDUURRRRRDDRRUU"
+}

@@ -280,7 +280,7 @@ All item, character and map art comes from the owner's own resources (owner deci
 
 ## Technical architecture
 
-Engine is **not decided yet** (see open decisions). Candidates: Godot 4 (one project exports web, iOS, Android) or TypeScript + Phaser built with Vite and wrapped for iOS/Android with Capacitor. Levels are drawn in the free Tiled editor and exported as JSON either way.
+Engine: **TypeScript + Phaser 3, built with Vite** (owner decision, 18 Nov 2026); iOS/Android apps wrap the web build with Capacitor. Levels are stored as JSON with a text map (one string per row) so they diff cleanly in pull requests; see `levels/README.md`.
 
 **Key rule:** game logic runs on a fixed grid tick and knows nothing about rendering. The renderer only animates between tick states. This makes the physics deterministic, testable and easy to undo/replay.
 
@@ -300,7 +300,7 @@ Engine is **not decided yet** (see open decisions). Candidates: Godot 4 (one pro
 | SaveSystem | Local storage, 3 slots |
 | Solver (dev tool) | Breadth-first search that proves a room is solvable; runs in CI on every level |
 
-**Level file format (exported from Tiled, simplified)** — see [`levels/README.md`](../levels/README.md)
+**Level file format (early draft; the current format is in [`levels/README.md`](../levels/README.md))**
 
 ```json
 {
@@ -343,7 +343,7 @@ Build the rules first, then one world end to end, then copy the pipeline to the 
 
 **Decisions awaiting the owner's approval** (everything above is a draft until these are confirmed)
 
-- [ ] Engine: Phaser + Capacitor (web code wrapped as iOS/Android apps) or Godot 4 (one project exports web, iOS, Android). Platforms decided: web + iOS + Android
+- [x] Engine: Phaser + TypeScript, wrapped with Capacitor for iOS/Android (decided 18 Nov 2026). Platforms: web + iOS + Android
 - [ ] Scope: 3 worlds × 10 levels + boss (33 stages) assumed for now, or a smaller first release
 - [ ] Combat: puzzle-only (enemies die only by boulders/hazards) or add a direct attack
 - [ ] Art style: 32×32 pixel art, or another style

@@ -6,7 +6,8 @@ All names, art and levels are original; only the genre and mechanics are borrowe
 
 - **Platforms:** web, iOS and Android
 - **Scope (draft):** 3 worlds × 10 levels + 1 boss each = 33 stages
-- **Status:** design phase — engine not chosen yet
+- **Engine:** Phaser 3 + TypeScript (Vite); iOS/Android via Capacitor later
+- **Status:** M0 prototype
 
 ## Documents
 
@@ -15,6 +16,20 @@ All names, art and levels are original; only the genre and mechanics are borrowe
 | [`docs/GDD.md`](docs/GDD.md) | Game design document: mechanics, worlds, levels, art/audio, architecture, roadmap |
 | [`CREDITS.md`](CREDITS.md) | Every third-party asset used, with source and licence |
 | [`levels/README.md`](levels/README.md) | Level file format and naming |
+
+## Run it
+
+Needs Node.js 22.18 or newer.
+
+```bash
+npm install
+npm run dev            # play at http://localhost:5173
+npm test               # rule tests
+npm run verify-levels  # replay every level's stored solution
+npm run build          # production build in dist/
+```
+
+Controls: arrows / WASD to move (swipe on touch screens), R restart, N next level.
 
 ## Repository layout
 
