@@ -17,6 +17,7 @@ All names, art and levels are original; only the genre and mechanics are borrowe
 | [`CREDITS.md`](CREDITS.md) | Every third-party asset used, with source and licence |
 | [`levels/README.md`](levels/README.md) | Level file format, map legend and tools |
 | [`docs/MOBILE.md`](docs/MOBILE.md) | Building the iOS and Android apps with Capacitor |
+| [`docs/ART-SPEC.md`](docs/ART-SPEC.md) | Every art resource needed for finished graphics, with sizes and frames |
 | [`assets/audio/README.md`](assets/audio/README.md) | Sound file names to drop in |
 
 ## Play the test version
@@ -61,7 +62,7 @@ tools/solver/    solver that proves levels are solvable
 
 ## Assets
 
-- **Art:** supplied by the owner. Placeholder grey boxes are used until files arrive in `assets/sprites/`.
+- **Art:** the explorer and items are hand-drawn 16×16 pixel sprites in `src/game/spriteData.ts`; tiles and enemies are still simple shapes. Finished art comes from the owner. See [`docs/ART-SPEC.md`](docs/ART-SPEC.md).
 - **Audio:** free CC0 / Pixabay / Sonniss sources for the test version. Log every file in `CREDITS.md`.
 
 ## Roadmap

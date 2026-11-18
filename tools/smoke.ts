@@ -6,6 +6,7 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
+import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const TYPES: Record<string, string> = {
@@ -65,6 +66,17 @@ try {
   await page.waitForTimeout(200);
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
+  // Screenshots of a few levels for reviewing the art (uploaded as a CI artifact).
+  mkdirSync('screenshots', { recursive: true });
+  for (const id of ['J-02', 'J-07', 'D-03', 'S-05']) {
+    await page.evaluate((levelId) => {
+      const g = window.__game!;
+      for (const sc of g.scene.getScenes(true)) g.scene.stop(sc.scene.key);
+      g.scene.start('Game', { levelId });
+    }, id);
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: `screenshots/${id}.png` });
+  }
   // Every menu scene and one level per world renders without errors.
   for (const [scene, data] of [
     ['WorldMap', {}], ['Training', {}], ['Settings', {}], ['Rewards', {}],
