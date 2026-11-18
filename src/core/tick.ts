@@ -115,6 +115,13 @@ function movePlayer(s: GameState, dir: Dir): void {
   const o = objAt(s, nx, ny);
   if (o) {
     const rule = OBJ_RULES[o.kind];
+    if (o.contains) {
+      // Bumping a chest opens it; its item appears in its place (no key needed).
+      const item = makeObj(s, o.contains);
+      setObj(s, nx, ny, item);
+      s.events.push({ type: 'open', x: nx, y: ny, kind: item.kind });
+      return;
+    }
     if (rule.collectible) {
       setObj(s, nx, ny, null);
       collect(s, o, nx, ny);

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import type { LevelDef } from '../../src/core/level.ts';
+import { countRedDiamonds, parseLevel, type LevelDef } from '../../src/core/level.ts';
 import { objAt, terrainAt } from '../../src/core/grid.ts';
 import { replay } from '../../src/core/replay.ts';
 import { Session } from '../../src/core/session.ts';
@@ -147,4 +147,20 @@ test('hard mode ignores checkpoints in boss stages', () => {
   play(sess, 'R');
   play(sess, 'R');
   assert.equal(sess.state.player.x, 1, 'back to the start, not the checkpoint');
+});
+
+test('walking into a chest opens it without a key; the item appears in its place', () => {
+  const def = { ...lvl(['#######', '#P$&  #', '#######']), chests: { '2,1': 'keySilver' as const } };
+  const s = replay(def, 'R');
+  assert.equal(s.player.x, 1, 'opening takes the move');
+  assert.equal(objAt(s, 2, 1)?.kind, 'keySilver');
+  const s2 = replay(def, 'RRR');
+  assert.equal(s2.keys.silver, 1);
+  assert.equal(objAt(s2, 3, 1)?.kind, 'redDiamond', 'gold chest holds a red diamond by default');
+  const s3 = replay(def, 'RRRR');
+  assert.equal(s3.redDiamonds, 1);
+});
+
+test('red diamonds inside chests count toward the level total', () => {
+  assert.equal(countRedDiamonds(parseLevel(lvl(['#####', '#P&r#', '#####']))), 2);
 });

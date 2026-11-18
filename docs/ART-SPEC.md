@@ -2,7 +2,7 @@
 
 **Decided (18 Nov 2026):** 32×32 pixel art. The explorer follows the owner's concept: messy brown hair, goggles on the forehead, green cloak, olive jacket, leather straps and backpack, sword on the back, blue fingerless gloves, golden compass. The Jungle world follows the owner's reference photos of Angkor-style temple ruins: carved, mossy grey sandstone, strangler-fig roots, reddish laterite paths and a dark green river.
 
-**Current state:** the 32×32 explorer and Jungle tile set are drawn by scripts in `tools/art/` (`python3 tools/art/build.py` regenerates `src/game/art/generated.ts`). Items are still 16×16 drawn at 2×; Desert and Snow tiles, enemies and bosses are still simple shapes. This list is what's needed to replace everything with finished art, in priority order.
+**Current state:** the 32×32 explorer and Jungle tile set are drawn by scripts in `tools/art/` (`python3 tools/art/build.py` regenerates `src/game/art/generated.ts`). **Received from the owner and in the game (19 Nov):** heart, blue/red diamond (octagon cut), silver/gold keys, wooden/gold chests, converted by `tools/art/import_images.py` from `tools/art/source/`; the boulder is drawn in the style of the owner's stone-ball reference. Machete, shovel, pickaxe, sand pile, ice block and snowballs are still 16×16 drawn at 2×; Desert and Snow tiles, enemies and bosses are still simple shapes. This list is what's needed to replace everything with finished art, in priority order.
 
 ## 0. Decisions first (owner)
 
@@ -33,16 +33,16 @@ One PNG sprite sheet, transparent background, frames in a grid of 16×16 (or 32�
 
 | Item | Frames | Notes |
 | --- | --- | --- |
-| Boulder | 1 + 2 roll | |
-| Blue diamond | 4 | sparkle loop |
-| Red diamond | 4 | sparkle loop, clearly rarer than blue |
-| Silver key, gold key | 1 each | |
-| Heart | 2 | gentle pulse |
+| Boulder | 1 + 2 roll | ✓ drawn in the style of your stone-ball reference |
+| Blue diamond | 4 | sparkle loop — ✓ received |
+| Red diamond | 4 | sparkle loop, clearly rarer than blue — ✓ received |
+| Silver key, gold key | 1 each | — ✓ received |
+| Heart | 2 | gentle pulse — ✓ received |
 | Machete, shovel, pickaxe | 1 each | pickup icons; also used in the HUD |
 | Sand pile | 1 | |
 | Ice block | 1 | |
 | Snowball small / big | 1 each + 2 roll | |
-| Chest (planned) | 2 (closed/open) | |
+| Chest, gold chest | ✓ received | opened by walking into them, no key; gold chests hold red diamonds |
 
 ## 3. Tiles, per world (Jungle, Desert, Snow)
 

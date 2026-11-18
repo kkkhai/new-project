@@ -1,4 +1,5 @@
 import { makeObj } from './grid.ts';
+import { CHEST_DEFAULT } from './rules.ts';
 import type { ActorKind, Dir, GameState, ObjKind, Terrain, ToolKind } from './types.ts';
 
 /**
@@ -17,6 +18,8 @@ export interface LevelDef {
   map: string[];
   /** Moves that finish the level: U D L R, and "." to wait one tick. Checked in CI. */
   solution?: string;
+  /** Chest contents by "x,y" (default: wooden chest holds a heart, gold chest a red diamond). */
+  chests?: Record<string, ObjKind>;
   /** A route that also collects every red diamond. Checked in CI. */
   secretSolution?: string;
   notes?: string;
@@ -78,6 +81,8 @@ export const LEGEND: Readonly<Record<string, Cell>> = {
   H: { terrain: 'floor', actor: 'yetiCub', dir: 'left' },
   F: { terrain: 'floor', actor: 'frostSpirit', dir: 'right' },
   T: { terrain: 'floor', actor: 'yeti', dir: 'left' },
+  $: { terrain: 'floor', obj: 'chest' },
+  '&': { terrain: 'floor', obj: 'goldChest' },
 };
 
 const ACTOR_HP: Partial<Record<ActorKind, number>> = { idol: 3, serpent: 3, yeti: 3 };
@@ -123,7 +128,11 @@ export function parseLevel(def: LevelDef, opts: ParseOptions = {}): GameState {
       if (!cell) throw new LevelError(`${def.id}: unknown map character "${ch}" at ${x},${y}`);
       const i = y * width + x;
       s.terrain[i] = cell.terrain;
-      if (cell.obj) s.objs[i] = makeObj(s, cell.obj);
+      if (cell.obj) {
+        const o = makeObj(s, cell.obj);
+        if (o.kind === 'chest' || o.kind === 'goldChest') o.contains = def.chests?.[`${x},${y}`] ?? CHEST_DEFAULT[o.kind];
+        s.objs[i] = o;
+      }
       if (cell.actor) {
         s.actors.push({
           id: s.nextId++, kind: cell.actor, x, y, dir: cell.dir ?? 'right', alive: true,
@@ -142,6 +151,8 @@ export function parseLevel(def: LevelDef, opts: ParseOptions = {}): GameState {
   return s;
 }
 
-export const countRedDiamonds = (s: GameState): number => s.objs.filter((o) => o?.kind === 'redDiamond').length;
+/** Red diamonds in the level, including those hidden in chests. */
+export const countRedDiamonds = (s: GameState): number =>
+  s.objs.filter((o) => o?.kind === 'redDiamond' || o?.contains === 'redDiamond').length;
 
 export const countDiamonds = (s: GameState): number => s.objs.filter((o) => o?.kind === 'diamond').length;

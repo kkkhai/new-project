@@ -254,6 +254,7 @@ export class GameScene extends Phaser.Scene {
     for (const e of events) if (e.type === 'dart') this.drawDart(e.x, e.y, e.toX ?? e.x);
     if (events.some((e) => e.type === 'steal')) this.flash(t('stolen'), '#ff9f43');
     if (events.some((e) => e.type === 'grow')) this.flash(t('grew'), '#e8f8ff');
+    if (events.some((e) => e.type === 'open')) this.cameras.main.flash(120, 255, 230, 160);
     if (events.some((e) => e.type === 'bossDefeated')) this.flash(t('bossDown'), '#f0c850', 1800);
     else if (events.some((e) => e.type === 'bossHit')) this.cameras.main.shake(250, 0.012);
 
@@ -438,9 +439,13 @@ export class GameScene extends Phaser.Scene {
             break;
           case 'doorSilver':
           case 'doorGold':
-            g.fillStyle(COLORS.wallEdge).fillRect(px, py, TILE, TILE);
-            g.fillStyle(t === 'doorGold' ? COLORS.keyGold : COLORS.keySilver).fillRect(px + 4, py + 2, TILE - 8, TILE - 2);
-            g.fillStyle(COLORS.wallEdge).fillCircle(px + 16, py + 14, 4).fillRect(px + 14, py + 16, 4, 8);
+            // Locked gate: bars plus a padlock in the colour of the key that opens it.
+            floor();
+            g.fillStyle(COLORS.gate);
+            for (const bx of [4, 13, 22]) g.fillRect(px + bx, py, 6, TILE);
+            g.fillStyle(t === 'doorGold' ? COLORS.keyGold : COLORS.keySilver).fillRect(px + 9, py + 12, 14, 12);
+            g.lineStyle(3, t === 'doorGold' ? COLORS.keyGold : COLORS.keySilver).strokeRect(px + 12, py + 6, 8, 8);
+            g.fillStyle(0x000000).fillRect(px + 15, py + 16, 2, 5);
             break;
           case 'plate': {
             const pressed = !!s.objs[y * s.width + x] || (s.player.x === x && s.player.y === y);

@@ -1,4 +1,7 @@
-import { EXPLORER_32, EXPLORER_32_COSTUME, JUNGLE_TILES } from './art/generated.ts';
+import {
+  EXPLORER_32, EXPLORER_32_COSTUME, ITEM_boulder, ITEM_chest, ITEM_diamond, ITEM_goldChest, ITEM_heart,
+  ITEM_keyGold, ITEM_keySilver, ITEM_redDiamond, JUNGLE_TILES,
+} from './art/generated.ts';
 
 /**
  * Pixel art for the game. Items are hand-drawn 16×16 (shown at 2×); the explorer and the
@@ -21,104 +24,12 @@ const EMPTY = '................';
 
 // ---------------------------------------------------------------- items
 
-const BOULDER: SpriteDef = {
-  palette: { k: '#2a2420', l: '#bcb2a4', w: '#ece4d8', g: '#8e8478', G: '#5e564c' },
-  frames: {
-    main: [
-      EMPTY,
-      '.....kkkkkk.....',
-      '...kkllllggkk...',
-      '..klllllgggggk..',
-      '.kllwllggggggGk.',
-      '.klllggggggggGk.',
-      'kllgggggGgggGGGk',
-      'klgggggGGggggGGk',
-      'kgggggggggGgGGGk',
-      'kggGgggggggggGGk',
-      'kgggGGgggggGGGGk',
-      '.kggggggggGGGGk.',
-      '.kGgggggGGGGGGk.',
-      '..kGGGGGGGGGGk..',
-      '...kkGGGGGGkk...',
-      '.....kkkkkk.....',
-    ],
-  },
-};
 
-const GEM_ROWS = [
-  EMPTY,
-  EMPTY,
-  '....kkkkkkkk....',
-  '...kLLwLdddDk...',
-  '..kLwLLddddDDk..',
-  '.kkkkkkkkkkkkkk.',
-  '.kLLddddddDDDDk.',
-  '..kLdddddDDDDk..',
-  '...kLddddDDDk...',
-  '....kLdddDDk....',
-  '.....kLddDk.....',
-  '......kdDk......',
-  '.......kk.......',
-  EMPTY,
-  EMPTY,
-  EMPTY,
-];
 
-const DIAMOND: SpriteDef = {
-  palette: { k: '#0c2a44', L: '#b8ecff', w: '#ffffff', d: '#4fc3f7', D: '#1e88c8' },
-  frames: { main: GEM_ROWS },
-};
 
-const RED_DIAMOND: SpriteDef = {
-  palette: { k: '#44081a', L: '#ffc0cc', w: '#ffffff', d: '#ff3b5c', D: '#b81838' },
-  frames: { main: GEM_ROWS },
-};
 
-const HEART: SpriteDef = {
-  palette: { k: '#4a0c18', w: '#ffd0d8', r: '#ff4d6a', R: '#c0203c' },
-  frames: {
-    main: [
-      EMPTY,
-      EMPTY,
-      '..kkkk...kkkk...',
-      '.kwwrrk.krrrRk..',
-      'kwwrrrrkrrrrRRk.',
-      'kwrrrrrrrrrrRRk.',
-      'krrrrrrrrrrrRRk.',
-      '.krrrrrrrrrRRk..',
-      '..krrrrrrrRRk...',
-      '...krrrrrRRk....',
-      '....krrrRRk.....',
-      '.....krRRk......',
-      '......kRk.......',
-      '.......k........',
-      EMPTY,
-      EMPTY,
-    ],
-  },
-};
 
-const KEY_ROWS = [
-  EMPTY,
-  EMPTY,
-  EMPTY,
-  '..kkkk..........',
-  '.kmwmmk.........',
-  'kmk..kmk........',
-  'kmk..kmkkkkkkkk.',
-  'kmk..kmmmmmmmmMk',
-  'kMk..kMkkkMkkMk.',
-  '.kMMMMk...k..k..',
-  '..kkkk..........',
-  EMPTY,
-  EMPTY,
-  EMPTY,
-  EMPTY,
-  EMPTY,
-];
 
-const KEY_SILVER: SpriteDef = { palette: { k: '#2a2e36', m: '#d0d6e0', M: '#8a94a4', w: '#ffffff' }, frames: { main: KEY_ROWS } };
-const KEY_GOLD: SpriteDef = { palette: { k: '#4a3008', m: '#ffd03c', M: '#c08a10', w: '#fff6c0' }, frames: { main: KEY_ROWS } };
 
 const HANDLE = { h: '#8a5a2e', H: '#5a3418' };
 
@@ -296,12 +207,15 @@ const BIG_SNOWBALL: SpriteDef = {
 export const SPRITES: Record<string, SpriteDef> = {
   explorer: EXPLORER_32,
   'tiles-jungle': JUNGLE_TILES,
-  boulder: BOULDER,
-  diamond: DIAMOND,
-  redDiamond: RED_DIAMOND,
-  heart: HEART,
-  keySilver: KEY_SILVER,
-  keyGold: KEY_GOLD,
+  // 32×32, from the owner's item art (tools/art/source) and the drawn stone-ball boulder
+  boulder: ITEM_boulder,
+  diamond: ITEM_diamond,
+  redDiamond: ITEM_redDiamond,
+  heart: ITEM_heart,
+  keySilver: ITEM_keySilver,
+  keyGold: ITEM_keyGold,
+  chest: ITEM_chest,
+  goldChest: ITEM_goldChest,
   machete: MACHETE,
   shovel: SHOVEL,
   pickaxe: PICKAXE,

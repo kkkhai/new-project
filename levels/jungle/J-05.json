@@ -13,10 +13,10 @@
     "#  O=########",
     "#.###########",
     "#P =  G  * E#",
-    "######.###r##",
+    "######.###&##",
     "######*######",
     "#############"
   ],
   "solution": "UURRLLDDRRRRRDDUURRRRR",
-  "secretSolution": "UURRLLDDRRRRRDDUURRRRDUR"
+  "secretSolution": "UURRLLDDRRRRRDDUURRRRDDUR"
 }

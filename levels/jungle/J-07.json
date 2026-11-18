@@ -10,12 +10,15 @@
   "notes": "Insight: silver key opens the first door, gold key the last. The monkey steals a diamond if it touches you: dodge it or drop the boulder on it.",
   "map": [
     "##############",
-    "#P *k#*  O  K#",
+    "#P *$#*  O  K#",
     "#  ..d   .  ##",
-    "######M  *r D#",
+    "######M  *& D#",
     "############E#",
     "##############"
   ],
-  "solution": "RRRDRRDURDRRURURRLDDRD",
-  "secretSolution": "RRRDRRDURDRRURURRLDDLRRD"
+  "solution": "RRRRDRRDURDRRURURRLDDRD",
+  "secretSolution": "RRRRDRRDURDRRURURRLDDLLRRD",
+  "chests": {
+    "4,1": "keySilver"
+  }
 }
