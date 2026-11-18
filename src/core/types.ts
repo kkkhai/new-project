@@ -49,7 +49,9 @@ export type ObjKind =
   | 'sand' // falls like a boulder but never crushes and does not roll
   | 'iceBlock' // pushable, slides on ice, never crushes; the pickaxe breaks it
   | 'snowball' // small: pushable and harmless; grows big after rolling 3 tiles
-  | 'bigSnowball'; // crushes like a boulder and is too heavy to push
+  | 'bigSnowball' // crushes like a boulder and is too heavy to push
+  | 'chest' // walk into it to open it (no key needed); its item pops out in its place
+  | 'goldChest'; // same, but holds a red diamond unless the level says otherwise
 
 export type ToolKind = 'machete' | 'shovel' | 'pickaxe';
 
@@ -92,6 +94,8 @@ export interface Obj {
   sliding?: Dir | null;
   /** Tiles a snowball has rolled (it grows at 3). */
   rolled?: number;
+  /** What a chest holds. */
+  contains?: ObjKind;
 }
 
 export interface Player {
@@ -138,7 +142,8 @@ export type GameEventType =
   | 'crack'
   | 'grow'
   | 'stun'
-  | 'shatter';
+  | 'shatter'
+  | 'open';
 
 /** Events produced by a tick, used by the renderer for sound and effects. */
 export interface GameEvent {

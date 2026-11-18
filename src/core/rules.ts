@@ -28,7 +28,12 @@ export const OBJ_RULES: Readonly<Record<ObjKind, ObjRule>> = {
   iceBlock: { gravity: true, round: false, crushes: false, pushable: true, collectible: false },
   snowball: { gravity: true, round: true, crushes: false, pushable: true, collectible: false },
   bigSnowball: { gravity: true, round: true, crushes: true, pushable: false, collectible: false },
+  chest: { gravity: false, round: false, crushes: false, pushable: false, collectible: false },
+  goldChest: { gravity: false, round: false, crushes: false, pushable: false, collectible: false },
 };
+
+/** What a chest holds when the level doesn't say. */
+export const CHEST_DEFAULT: Readonly<Record<'chest' | 'goldChest', ObjKind>> = { chest: 'heart', goldChest: 'redDiamond' };
 
 /** Which tool cuts/breaks which terrain, and what it leaves behind. */
 export const TOOL_TARGETS: Readonly<Partial<Record<Terrain, { tool: ToolKind; becomes: Terrain }>>> = {

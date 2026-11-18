@@ -247,13 +247,17 @@ def gate(open_):
 
 
 def door(metal, dark):
-    c = wall()
-    c.rect(5, 3, 26, 31, 'D')
-    c.rect(7, 5, 24, 31, metal)
-    c.rect(24, 5, 24, 31, dark); c.rect(7, 5, 24, 5, 'h')
-    for y in (11, 21):
-        c.rect(7, y, 24, y, dark)
-    c.ellipse(15.5, 16, 2.5, 2.5, 'k'); c.rect(15, 17, 16, 21, 'k')
+    """Locked gate: bronze bars held shut by a padlock; the key colour shows which key opens it."""
+    c = gate(False)
+    c.rect(9, 10, 22, 13, 'B')                       # crossbar the lock hangs on
+    for x in (12, 19):
+        c.rect(x, 7, x, 13, metal)                   # shackle
+    c.rect(12, 6, 19, 6, metal)
+    c.rect(10, 13, 21, 24, metal)                    # lock body
+    c.rect(21, 13, 21, 24, dark); c.rect(10, 24, 21, 24, dark); c.rect(10, 13, 21, 13, 'h')
+    c.ellipse(15.5, 17, 1.6, 1.6, 'k'); c.rect(15, 18, 16, 21, 'k')
+    for x, y in ((10, 12), (21, 12), (9, 13), (22, 13), (9, 24), (22, 24)):
+        c.px(x, y, 'k')
     return c
 
 

@@ -1,4 +1,4 @@
-import type { LevelDef } from '../core/level.ts';
+import { countRedDiamonds, parseLevel, type LevelDef } from '../core/level.ts';
 
 const modules = import.meta.glob<LevelDef>('../../levels/**/*.json', { eager: true, import: 'default' });
 
@@ -33,4 +33,4 @@ export function nextLevelId(id: string): string | undefined {
 }
 
 /** Red diamonds placed across the campaign (rewards scale with this). */
-export const RED_TOTAL = CAMPAIGN.reduce((n, l) => n + l.map.join('').split('r').length - 1, 0);
+export const RED_TOTAL = CAMPAIGN.reduce((n, l) => n + countRedDiamonds(parseLevel(l)), 0);

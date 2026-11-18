@@ -27,7 +27,7 @@ export function stateKey(s: GameState): string {
   if (s.terrain.some((t) => t === 'dartLeft' || t === 'dartRight')) parts.push(`t${s.tick % DART_PERIOD}`);
   parts.push(s.terrain.join(','));
   parts.push(s.player.facing + (s.player.sliding ?? ''));
-  parts.push(s.objs.map((o) => (o ? `${o.kind.slice(0, 3)}${o.falling ? 'f' : ''}${o.sliding?.[0] ?? ''}${o.rolled ?? ''}` : '-')).join(''));
+  parts.push(s.objs.map((o) => (o ? `${o.kind.slice(0, 3)}${o.falling ? 'f' : ''}${o.sliding?.[0] ?? ''}${o.rolled ?? ''}${o.contains ?? ''}` : '-')).join(''));
   parts.push(s.actors.map((a) => `${a.alive ? 1 : 0}${a.x},${a.y},${a.dir[0]},${a.wait},${a.hp},${a.carrying},${a.mode[0]}`).join(';'));
   parts.push(JSON.stringify(extraKey(s)));
   return parts.join('|');

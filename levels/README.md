@@ -36,6 +36,7 @@ File name = level id, e.g. `jungle/J-05.json`.
 | `notes` | The room's one insight (design checklist) |
 | `parTimeSec` | Par time for 2 stars |
 | `tools` | Tools already owned at the start (earned in earlier levels), e.g. `["machete"]` |
+| `chests` | What each chest holds, by `"x,y"`, e.g. `{"4,1": "keySilver"}` |
 | `solution` | Moves that win the level: `U D L R`, `X` = use tool, `.` = wait one tick. CI replays it on every pull request. |
 | `secretSolution` | Required when the map has red diamonds: a route that wins *and* collects them all. CI checks it. |
 
@@ -56,8 +57,10 @@ File name = level id, e.g. `jungle/J-05.json`.
 | `_` | Pit (an object that falls or is pushed in fills it) |
 | `C` | Checkpoint totem |
 | `k` / `K` | Silver / gold key |
-| `d` / `D` | Silver / gold locked door |
+| `d` / `D` | Silver / gold locked gate (padlock; the matching key opens it) |
 | `h` | Heart |
+| `$` | Chest: walk into it to open it (no key needed); holds a heart unless `chests` says otherwise |
+| `&` | Gold chest: same, holds a red diamond by default |
 | `=` | Pressure plate (a boulder or the player holds it down) |
 | `/` | Lever (bump it to toggle) |
 | `G` | Gate (open while any plate is pressed or the lever is on) |

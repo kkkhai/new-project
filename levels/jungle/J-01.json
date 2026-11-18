@@ -11,9 +11,9 @@
     "#.####..v.##.#",
     "#*..m...v...*#",
     "######v#######",
-    "#    r.    E #",
+    "#    &.    E #",
     "##############"
   ],
   "solution": "RRRLLLDDRRRRRRRXRRRRRUULLLDDLLLDXDDRRRRR",
-  "secretSolution": "RRRLLLDDRRRRRRRXRRRRRUULLLDDLLLDXDDLRRRRRR"
+  "secretSolution": "RRRLLLDDRRRRRRRXRRRRRUULLLDDLLLDXDDLLRRRRRR"
 }
