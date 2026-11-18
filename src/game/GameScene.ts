@@ -27,7 +27,10 @@ declare global {
   }
 }
 
-type View = Phaser.GameObjects.Shape | Phaser.GameObjects.Container;
+type View = Phaser.GameObjects.Shape | Phaser.GameObjects.Container | Phaser.GameObjects.Image;
+
+/** Sprites are drawn at 16×16 and shown at 2× so one sprite fills one 32 px tile. */
+const SPRITE_SCALE = TILE / 16;
 
 /**
  * Plays one level: runs the fixed tick, draws placeholder shapes, handles input,
@@ -43,7 +46,10 @@ export class GameScene extends Phaser.Scene {
   private terrainGfx!: Phaser.GameObjects.Graphics;
   private objViews = new Map<number, View>();
   private actorViews = new Map<number, View>();
-  private playerView!: Phaser.GameObjects.Rectangle;
+  private playerView!: Phaser.GameObjects.Image;
+  private objKinds = new Map<number, string>();
+  private walkFrame = 1;
+  private idleTimer?: Phaser.Time.TimerEvent;
   private hud!: Phaser.GameObjects.Text;
   private banner!: Phaser.GameObjects.Text;
   private pauseLayer: Phaser.GameObjects.GameObject[] = [];
@@ -63,6 +69,7 @@ export class GameScene extends Phaser.Scene {
   init(data: { levelId?: string }): void {
     this.def = levelById(data.levelId ?? '') ?? TRAINING[0];
     this.objViews = new Map();
+    this.objKinds = new Map();
     this.actorViews = new Map();
     this.heldDirs = [];
     this.queuedDir = null;
@@ -83,10 +90,7 @@ export class GameScene extends Phaser.Scene {
     this.redTotal = countRedDiamonds(parseLevel(this.def));
     this.terrainGfx = this.add.graphics();
     const costume = save.settings.costume;
-    this.playerView = this.add
-      .rectangle(0, 0, TILE - 8, TILE - 6, costume ? COLORS.exitOpen : COLORS.player)
-      .setStrokeStyle(2, costume ? 0xffffff : COLORS.playerFace)
-      .setDepth(10);
+    this.playerView = this.add.image(0, 0, costume ? 'explorer-gold' : 'explorer', 'down-0').setScale(SPRITE_SCALE).setDepth(10);
 
     this.hud = this.add
       .text(12, 10, '', { fontFamily: FONT, fontSize: '18px', color: '#f5e9d0', backgroundColor: '#00000088', padding: { x: 6, y: 4 } })
@@ -358,6 +362,7 @@ export class GameScene extends Phaser.Scene {
     this.syncActors(instant);
     this.moveView(this.playerView, this.state.player.x, this.state.player.y, instant);
     this.playerView.setVisible(this.state.player.alive);
+    this.animatePlayer(instant);
     const st = this.state;
     const hearts = '♥'.repeat(st.hearts) + '♡'.repeat(Math.max(0, st.maxHearts - st.hearts));
     const keys = `${st.keys.silver ? `  silver key ×${st.keys.silver}` : ''}${st.keys.gold ? `  gold key ×${st.keys.gold}` : ''}`;
@@ -514,6 +519,28 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /** Pick the explorer frame: facing, walk cycle on each step, push pose, red flash when hurt. */
+  private animatePlayer(instant: boolean): void {
+    const p = this.state.player;
+    const side = p.facing === 'left' || p.facing === 'right';
+    const base = side ? 'right' : p.facing;
+    this.playerView.setFlipX(p.facing === 'left');
+    const events = this.state.events;
+    const pushed = events.some((e) => e.type === 'push' || e.type === 'cut' || e.type === 'shatter');
+    const stepped = !instant && events.some((e) => e.type === 'step');
+    if (pushed && side) {
+      this.playerView.setFrame('right-push');
+    } else if (stepped || (pushed && !side)) {
+      this.walkFrame = this.walkFrame === 1 ? 2 : 1;
+      this.playerView.setFrame(`${base}-${this.walkFrame}`);
+    } else {
+      this.playerView.setFrame(`${base}-0`);
+      return;
+    }
+    this.idleTimer?.remove();
+    this.idleTimer = this.time.delayedCall(TICK_MS + 40, () => this.playerView.setFrame(`${base}-0`));
+  }
+
   private syncObjects(instant: boolean): void {
     const s = this.state;
     const seen = new Set<number>();
@@ -523,9 +550,19 @@ export class GameScene extends Phaser.Scene {
       const x = i % s.width;
       const y = Math.floor(i / s.width);
       let view = this.objViews.get(o.id);
+      if (view && this.objKinds.get(o.id) !== o.kind) {
+        // The object changed kind (a snowball grew): swap its sprite in place.
+        const old = view;
+        view = this.makeObjView(o).setPosition(old.x, old.y);
+        old.destroy();
+        this.objViews.set(o.id, view);
+        this.objKinds.set(o.id, o.kind);
+        this.tweens.add({ targets: view, scale: { from: SPRITE_SCALE * 1.3, to: SPRITE_SCALE }, duration: 200 });
+      }
       if (!view) {
         view = this.makeObjView(o);
         this.objViews.set(o.id, view);
+        this.objKinds.set(o.id, o.kind);
         this.moveView(view, x, y, true);
       } else {
         this.moveView(view, x, y, instant);
@@ -558,41 +595,20 @@ export class GameScene extends Phaser.Scene {
       if (seen.has(id)) continue;
       views.delete(id);
       this.tweens.killTweensOf(view);
-      this.tweens.add({ targets: view, scale: 1.6, alpha: 0, duration: 180, onComplete: () => view.destroy() });
+      this.tweens.add({ targets: view, scale: view.scale * 1.6, alpha: 0, duration: 180, onComplete: () => view.destroy() });
     }
   }
 
   private makeObjView(o: Obj): View {
-    const gem = (color: number) =>
-      this.add.polygon(0, 0, [10, 0, 20, 12, 10, 24, 0, 12], color).setStrokeStyle(2, 0xffffff, 0.6).setDepth(5);
-    switch (o.kind) {
-      case 'boulder':
-        return this.add.circle(0, 0, TILE / 2 - 2, COLORS.boulder).setStrokeStyle(2, COLORS.boulderEdge).setDepth(5);
-      case 'diamond':
-        return gem(COLORS.diamond);
-      case 'redDiamond':
-        return gem(COLORS.redDiamond);
-      case 'keySilver':
-      case 'keyGold':
-        return this.add
-          .rectangle(0, 0, 18, 10, o.kind === 'keyGold' ? COLORS.keyGold : COLORS.keySilver)
-          .setStrokeStyle(2, 0x000000, 0.5)
-          .setDepth(5);
-      case 'heart':
-        return this.add.star(0, 0, 5, 5, 11, COLORS.heart).setDepth(5);
-      case 'machete':
-      case 'shovel':
-      case 'pickaxe':
-        return this.add.rectangle(0, 0, 6, 24, COLORS.tool).setAngle(35).setStrokeStyle(2, 0x000000, 0.5).setDepth(5);
-      case 'sand':
-        return this.add.ellipse(0, 4, TILE - 4, TILE - 10, COLORS.sand).setStrokeStyle(2, COLORS.quicksandSwirl).setDepth(5);
-      case 'iceBlock':
-        return this.add.rectangle(0, 0, TILE - 4, TILE - 4, COLORS.iceBlock, 0.9).setStrokeStyle(2, COLORS.iceShine).setDepth(5);
-      case 'snowball':
-        return this.add.circle(0, 4, 8, COLORS.snowball).setStrokeStyle(2, 0xa0b8d0).setDepth(5);
-      case 'bigSnowball':
-        return this.add.circle(0, 0, TILE / 2 - 1, COLORS.snowball).setStrokeStyle(2, 0xa0b8d0).setDepth(5);
+    const img = this.add.image(0, 0, o.kind, 'main').setScale(SPRITE_SCALE).setDepth(5);
+    if (o.kind === 'diamond' || o.kind === 'redDiamond') {
+      // Gems glint: a short brighten every couple of seconds, offset per gem.
+      this.tweens.add({
+        targets: img, alpha: { from: 1, to: 0.75 }, duration: 260, yoyo: true, repeat: -1,
+        repeatDelay: 1800 + (o.id % 7) * 170,
+      });
     }
+    return img;
   }
 
   private makeActorView(a: Actor): View {
@@ -678,11 +694,18 @@ export class GameScene extends Phaser.Scene {
     return c;
   }
 
+  /** Only the movement tween is replaced each tick, so effects like the gem glint keep running. */
+  private moveTweens = new WeakMap<View, Phaser.Tweens.Tween>();
+
   private moveView(view: View, x: number, y: number, instant: boolean): void {
     const tx = x * TILE + TILE / 2;
     const ty = y * TILE + TILE / 2;
-    this.tweens.killTweensOf(view);
-    if (instant) view.setPosition(tx, ty);
-    else this.tweens.add({ targets: view, x: tx, y: ty, duration: TICK_MS - 10 });
+    this.moveTweens.get(view)?.stop();
+    this.moveTweens.delete(view);
+    if (instant || (view.x === tx && view.y === ty)) {
+      view.setPosition(tx, ty);
+      return;
+    }
+    this.moveTweens.set(view, this.tweens.add({ targets: view, x: tx, y: ty, duration: TICK_MS - 10 }));
   }
 }

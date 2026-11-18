@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { preloadAudio } from '../audio.ts';
+import { makeTextures } from '../sprites.ts';
 
 /** Loads optional audio files, then shows the title screen. */
 export class BootScene extends Phaser.Scene {
@@ -12,6 +13,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
+    makeTextures(this);
     this.scene.start('Title');
   }
 }
