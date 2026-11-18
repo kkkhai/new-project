@@ -51,6 +51,7 @@ try {
   await page.waitForFunction(() => window.__drr !== undefined, null, { timeout: 15000 });
   const level = await page.evaluate(() => window.__drr!.levelId());
   console.log(`ok   started level ${level}`);
+  if (level !== 'J-01') fail(`Enter on a fresh save should start J-01, got ${level}`);
   const before = await page.evaluate(() => window.__drr!.state().player);
   await page.keyboard.down('ArrowRight');
   await page.waitForTimeout(250);

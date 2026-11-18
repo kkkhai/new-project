@@ -23,6 +23,8 @@ All names, art and levels are original; only the genre and mechanics are borrowe
 
 **https://kkkhai.github.io/new-project/**, rebuilt automatically every time `main` changes. Works in desktop and phone browsers.
 
+This is a **demo build: every level is unlocked** (including the secret level) so testers can jump anywhere. To make levels unlock one by one again, set `DEMO_UNLOCK_ALL = false` in `src/game/config.ts`.
+
 ## Run it
 
 Needs Node.js 22.18 or newer.
