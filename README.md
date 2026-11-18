@@ -19,6 +19,10 @@ All names, art and levels are original; only the genre and mechanics are borrowe
 | [`docs/MOBILE.md`](docs/MOBILE.md) | Building the iOS and Android apps with Capacitor |
 | [`assets/audio/README.md`](assets/audio/README.md) | Sound file names to drop in |
 
+## Play the test version
+
+**https://kkkhai.github.io/new-project/**, rebuilt automatically every time `main` changes. Works in desktop and phone browsers.
+
 ## Run it
 
 Needs Node.js 22.18 or newer.
