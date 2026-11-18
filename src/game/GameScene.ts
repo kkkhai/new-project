@@ -7,6 +7,7 @@ import type { Actor, Dir, GameState, Obj } from '../core/types.ts';
 import { Audio } from './audio.ts';
 import { CAMPAIGN_ORDER, levelById, nextLevelId, TRAINING } from './levels.ts';
 import { COLORS, TILE, WORLD_TINT } from './palette.ts';
+import { SPRITES } from './spriteData.ts';
 import { DART_PERIOD } from '../core/rules.ts';
 import type { ResultsData } from './scenes/ResultsScene.ts';
 import { loadSave, writeSave } from './save.ts';
@@ -29,8 +30,13 @@ declare global {
 
 type View = Phaser.GameObjects.Shape | Phaser.GameObjects.Container | Phaser.GameObjects.Image;
 
-/** Sprites are drawn at 16×16 and shown at 2× so one sprite fills one 32 px tile. */
-const SPRITE_SCALE = TILE / 16;
+/** Scale a sprite so one frame fills one tile (16 px art at 2×, 32 px art at 1×). */
+const scaleFor = (key: string): number => TILE / (SPRITES[key]?.size ?? 16);
+
+/** Worlds that have a 32×32 tile set (others still use the drawn placeholder tiles). */
+const TILESETS: Record<string, string> = { jungle: 'tiles-jungle' };
+/** Terrain that reads as a solid block, so a wall above it shows its top, not its carved face. */
+const BLOCKY = new Set(['wall', 'cracked', 'doorSilver', 'doorGold', 'lever', 'exit', 'dartLeft', 'dartRight', 'iceWall']);
 
 /**
  * Plays one level: runs the fixed tick, draws placeholder shapes, handles input,
@@ -49,6 +55,7 @@ export class GameScene extends Phaser.Scene {
   private playerView!: Phaser.GameObjects.Image;
   private objKinds = new Map<number, string>();
   private walkFrame = 1;
+  private tileImages: (Phaser.GameObjects.Image | null)[] = [];
   private idleTimer?: Phaser.Time.TimerEvent;
   private hud!: Phaser.GameObjects.Text;
   private banner!: Phaser.GameObjects.Text;
@@ -70,6 +77,7 @@ export class GameScene extends Phaser.Scene {
     this.def = levelById(data.levelId ?? '') ?? TRAINING[0];
     this.objViews = new Map();
     this.objKinds = new Map();
+    this.tileImages = [];
     this.actorViews = new Map();
     this.heldDirs = [];
     this.queuedDir = null;
@@ -90,7 +98,7 @@ export class GameScene extends Phaser.Scene {
     this.redTotal = countRedDiamonds(parseLevel(this.def));
     this.terrainGfx = this.add.graphics();
     const costume = save.settings.costume;
-    this.playerView = this.add.image(0, 0, costume ? 'explorer-gold' : 'explorer', 'down-0').setScale(SPRITE_SCALE).setDepth(10);
+    this.playerView = this.add.image(0, 0, costume ? 'explorer-gold' : 'explorer', 'down-0').setScale(scaleFor('explorer')).setDepth(10);
 
     this.hud = this.add
       .text(12, 10, '', { fontFamily: FONT, fontSize: '18px', color: '#f5e9d0', backgroundColor: '#00000088', padding: { x: 6, y: 4 } })
@@ -358,6 +366,7 @@ export class GameScene extends Phaser.Scene {
 
   private render(instant: boolean): void {
     this.drawTerrain();
+    this.drawTiles();
     this.syncObjects(instant);
     this.syncActors(instant);
     this.moveView(this.playerView, this.state.player.x, this.state.player.y, instant);
@@ -541,6 +550,66 @@ export class GameScene extends Phaser.Scene {
     this.idleTimer = this.time.delayedCall(TICK_MS + 40, () => this.playerView.setFrame(`${base}-0`));
   }
 
+  /** Pick a tile-set frame for a cell, or null to keep the drawn placeholder. */
+  private tileFrame(x: number, y: number): string | null {
+    const s = this.state;
+    const t = s.terrain[y * s.width + x];
+    const below = y + 1 < s.height ? s.terrain[(y + 1) * s.width + x] : 'wall';
+    switch (t) {
+      case 'floor':
+        return `floor-${(x * 7 + y * 13 + ((x * y) % 5)) % 3}`;
+      case 'wall':
+        return BLOCKY.has(below) ? 'wall' : 'wall-face';
+      case 'cracked':
+      case 'dirt':
+      case 'vines':
+      case 'thorns':
+      case 'spikes':
+      case 'pit':
+      case 'checkpoint':
+      case 'doorSilver':
+      case 'doorGold':
+        return t;
+      case 'water':
+        return `water-${Math.floor(this.time.now / 600) % 2}`;
+      case 'exit':
+        return exitOpen(s) ? 'exit-open' : 'exit-closed';
+      case 'plate':
+        return s.objs[y * s.width + x] || (s.player.x === x && s.player.y === y) ? 'plate-down' : 'plate-up';
+      case 'gate':
+        return s.gateOpen ? 'gate-open' : 'gate-closed';
+      case 'lever':
+        return s.leverOn ? 'lever-on' : 'lever-off';
+      default:
+        return null;
+    }
+  }
+
+  /** Lay the world's tile-set images over the drawn terrain (one image per cell, updated each tick). */
+  private drawTiles(): void {
+    const key = TILESETS[this.def.world];
+    if (!key) return;
+    const s = this.state;
+    for (let y = 0; y < s.height; y++) {
+      for (let x = 0; x < s.width; x++) {
+        const i = y * s.width + x;
+        const frame = this.tileFrame(x, y);
+        let img = this.tileImages[i] ?? null;
+        if (!frame) {
+          img?.setVisible(false);
+          continue;
+        }
+        if (!img) {
+          img = this.add.image(x * TILE + TILE / 2, y * TILE + TILE / 2, key, frame).setScale(scaleFor(key)).setDepth(1);
+          this.tileImages[i] = img;
+        } else if (img.frame.name !== frame) {
+          img.setFrame(frame);
+        }
+        img.setVisible(true);
+      }
+    }
+  }
+
   private syncObjects(instant: boolean): void {
     const s = this.state;
     const seen = new Set<number>();
@@ -557,7 +626,7 @@ export class GameScene extends Phaser.Scene {
         old.destroy();
         this.objViews.set(o.id, view);
         this.objKinds.set(o.id, o.kind);
-        this.tweens.add({ targets: view, scale: { from: SPRITE_SCALE * 1.3, to: SPRITE_SCALE }, duration: 200 });
+        this.tweens.add({ targets: view, scale: { from: scaleFor(o.kind) * 1.3, to: scaleFor(o.kind) }, duration: 200 });
       }
       if (!view) {
         view = this.makeObjView(o);
@@ -600,7 +669,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private makeObjView(o: Obj): View {
-    const img = this.add.image(0, 0, o.kind, 'main').setScale(SPRITE_SCALE).setDepth(5);
+    const img = this.add.image(0, 0, o.kind, 'main').setScale(scaleFor(o.kind)).setDepth(5);
     if (o.kind === 'diamond' || o.kind === 'redDiamond') {
       // Gems glint: a short brighten every couple of seconds, offset per gem.
       this.tweens.add({
