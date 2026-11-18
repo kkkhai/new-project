@@ -4,6 +4,7 @@ import { rewardUnlocked, totalRedDiamonds } from '../../core/progress.ts';
 import { t } from '../i18n.ts';
 import { CAMPAIGN, RED_TOTAL, SECRET, TRAINING, WORLDS } from '../levels.ts';
 import { loadSave } from '../save.ts';
+import { DEMO_UNLOCK_ALL } from '../config.ts';
 import { button, text } from '../ui.ts';
 
 const REGION = {
@@ -28,6 +29,7 @@ export class WorldMapScene extends Phaser.Scene {
     const top = 70;
     const bottom = height - 110;
     text(this, width / 2, 30, t('chooseLevel'), 26, '#f0c850').setOrigin(0.5);
+    if (DEMO_UNLOCK_ALL) text(this, 20, 30, 'DEMO', 16, '#ff9f43').setOrigin(0, 0.5);
     text(this, width - 20, 30, `♦ ${totalRedDiamonds(save)}/${RED_TOTAL}`, 18, '#ff6b85').setOrigin(1, 0.5);
 
     const g = this.add.graphics();
@@ -47,10 +49,10 @@ export class WorldMapScene extends Phaser.Scene {
       });
       g.lineStyle(4, 0xf5e9d0, 0.35);
       for (let i = 1; i < pts.length; i++) g.lineBetween(pts[i - 1].x, pts[i - 1].y, pts[i].x, pts[i].y);
-      levels.forEach((l, i) => this.node(l, pts[i].x, pts[i].y, save.unlocked.includes(l.id), save.records[l.id]?.stars ?? 0));
+      levels.forEach((l, i) => this.node(l, pts[i].x, pts[i].y, DEMO_UNLOCK_ALL || save.unlocked.includes(l.id), save.records[l.id]?.stars ?? 0));
     });
 
-    const showSecret = SECRET.length > 0 && rewardUnlocked(save, 'secretLevel', RED_TOTAL);
+    const showSecret = SECRET.length > 0 && (DEMO_UNLOCK_ALL || rewardUnlocked(save, 'secretLevel', RED_TOTAL));
     let bx = width / 2 - (showSecret ? 330 : 250);
     const bar: [string, () => void][] = [
       [t('back'), () => this.scene.start('Title')],
@@ -66,9 +68,11 @@ export class WorldMapScene extends Phaser.Scene {
 
     const kb = this.input.keyboard!;
     kb.on('keydown-ESC', () => this.scene.start('Title'));
+    // Enter: continue with the first unfinished level that is open.
     kb.on('keydown-ENTER', () => {
-      const last = [...CAMPAIGN].reverse().find((l) => save.unlocked.includes(l.id));
-      if (last) this.scene.start('Game', { levelId: last.id });
+      const open = CAMPAIGN.filter((l) => DEMO_UNLOCK_ALL || save.unlocked.includes(l.id));
+      const next = open.find((l) => !save.records[l.id]) ?? open.at(-1);
+      if (next) this.scene.start('Game', { levelId: next.id });
     });
   }
 
