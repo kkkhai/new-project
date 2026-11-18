@@ -1,7 +1,7 @@
 import * as Phaser from 'phaser';
 import { COSTUME_PALETTE, SPRITE_SIZE, SPRITES, type SpriteDef } from './spriteData.ts';
 
-/** Draw every sprite from spriteData.ts into canvas textures (one frame per 16×16 cell). */
+/** Draw every sprite from spriteData.ts into canvas textures (one frame per cell, 16 or 32 px). */
 export function makeTextures(scene: Phaser.Scene): void {
   const all: [string, SpriteDef][] = [
     ...Object.entries(SPRITES),
@@ -10,7 +10,8 @@ export function makeTextures(scene: Phaser.Scene): void {
   for (const [key, def] of all) {
     if (scene.textures.exists(key)) continue;
     const names = Object.keys(def.frames);
-    const tex = scene.textures.createCanvas(key, SPRITE_SIZE * names.length, SPRITE_SIZE);
+    const size = def.size ?? SPRITE_SIZE;
+    const tex = scene.textures.createCanvas(key, size * names.length, size);
     if (!tex) continue;
     const ctx = tex.getContext();
     names.forEach((name, i) => {
@@ -18,10 +19,10 @@ export function makeTextures(scene: Phaser.Scene): void {
         [...row].forEach((ch, x) => {
           if (ch === '.') return;
           ctx.fillStyle = def.palette[ch];
-          ctx.fillRect(i * SPRITE_SIZE + x, y, 1, 1);
+          ctx.fillRect(i * size + x, y, 1, 1);
         });
       });
-      tex.add(name, 0, i * SPRITE_SIZE, 0, SPRITE_SIZE, SPRITE_SIZE);
+      tex.add(name, 0, i * size, 0, size, size);
     });
     tex.refresh();
   }

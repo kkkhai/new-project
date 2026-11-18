@@ -1,15 +1,17 @@
 # Art resources needed
 
-The game now uses hand-drawn 16×16 pixel sprites for the explorer and all items (`src/game/spriteData.ts`), shown at 2× on a 32 px grid. Tiles, enemies and bosses are still simple shapes. This list is what's needed to replace everything with finished art, in priority order.
+**Decided (18 Nov 2026):** 32×32 pixel art. The explorer follows the owner's concept: messy brown hair, goggles on the forehead, green cloak, olive jacket, leather straps and backpack, sword on the back, blue fingerless gloves, golden compass. The Jungle world follows the owner's reference photos of Angkor-style temple ruins: carved, mossy grey sandstone, strangler-fig roots, reddish laterite paths and a dark green river.
+
+**Current state:** the 32×32 explorer and Jungle tile set are drawn by scripts in `tools/art/` (`python3 tools/art/build.py` regenerates `src/game/art/generated.ts`). Items are still 16×16 drawn at 2×; Desert and Snow tiles, enemies and bosses are still simple shapes. This list is what's needed to replace everything with finished art, in priority order.
 
 ## 0. Decisions first (owner)
 
 | Decision | Options | Why it matters |
 | --- | --- | --- |
-| **Pixel size** | 16×16 shown at 2× (current) · 32×32 shown at 1× | 32×32 allows much more detail but takes 4× the drawing work per frame |
+| **Pixel size** | ~~16×16 at 2×~~ · **32×32 at 1× (chosen)** | 32×32 allows much more detail but takes 4× the drawing work per frame |
 | **Palette** | Free choice · a fixed palette (e.g. [Endesga 32](https://lospec.com/palette-list/endesga-32), [Resurrect 64](https://lospec.com/palette-list/resurrect-64)) | A shared palette keeps three worlds and many artists consistent |
-| **Look of the explorer** | Keep the current hat + scarf design · your own concept | Everything else is styled around the hero |
-| **Mood references** | 5–10 screenshots or images you like, per world | Fastest way to agree on a style |
+| **Look of the explorer** | **Owner's concept (chosen)**: green cloak, goggles, sword, compass | Everything else is styled around the hero |
+| **Mood references** | Jungle: **provided** (Angkor temple ruins, fig roots, jungle river). Desert, Snow: still needed | Fastest way to agree on a style |
 
 ## 1. Explorer (highest priority)
 
